@@ -535,6 +535,23 @@ footer { background:#0e2033;color:#d6e2ec;padding:55px 0 22px; }
 .account-panel { border:1px solid var(--line);border-radius:12px;padding:17px;margin-top:16px; }
 .account-panel h3 { margin:0 0 5px;color:var(--navy);font:800 17px Manrope; }
 .account-panel p { margin:5px 0;color:var(--muted); }
+
+.dashboard-section { border-top:1px solid var(--line);margin-top:18px;padding-top:16px; }
+.dashboard-section h3 { margin:0 0 7px;color:var(--navy);font:800 16px Manrope; }
+.dashboard-help { font-size:13px;color:var(--muted);line-height:1.55;margin:5px 0 13px!important; }
+.dashboard-heading { display:flex;align-items:center;justify-content:space-between;gap:10px; }
+.btn-small { padding:8px 12px;font-size:12px; }
+.employer-jobs-list { display:grid;gap:10px;margin:12px 0 18px; }
+.employer-job-card { border:1px solid var(--line);border-radius:10px;padding:12px;background:#fbfdff; }
+.employer-job-card h4 { margin:0 0 5px;color:var(--navy);font-size:15px; }
+.employer-job-meta { color:var(--muted);font-size:12px;margin:4px 0; }
+.job-status { display:inline-block;border-radius:20px;padding:4px 9px;background:#eef2f6;color:#526273;font-size:11px;font-weight:800;text-transform:capitalize; }
+.job-status.published { background:#e5f7ee;color:#167344; }
+.job-status.closed { background:#fcebea;color:#a53b35; }
+.employer-job-card button { margin-top:9px; }
+#employerJobForm select,#employerJobForm textarea { width:100%;padding:12px;border:1px solid var(--line);border-radius:9px;font:inherit;color:var(--ink);background:#fff; }
+#employerJobForm textarea { resize:vertical; }
+
 .account-panel .btn { margin-top:12px; }
 
 
@@ -962,9 +979,30 @@ footer { background:#0e2033;color:#d6e2ec;padding:55px 0 22px; }
     </form>
 
     <div class="account-panel" id="employerAccountPanel" hidden>
-      <h3 id="employerAccountName">Your organisation</h3>
+      <h3 id="employerAccountName">Employer dashboard</h3>
       <p id="employerAccountEmail"></p>
       <p id="employerAccountState">Your employer profile is connected.</p>
+
+      <section class="dashboard-section">
+        <h3>Create a job vacancy</h3>
+        <p class="dashboard-help">New vacancies are saved as drafts. They will not appear publicly until CareBridge Jobs verification and approval are in place.</p>
+        <form id="employerJobForm">
+          <div class="form-group"><label for="jobTitle">Job title</label><input id="jobTitle" required maxlength="150" placeholder="e.g. Registered Nurse"></div>
+          <div class="form-group"><label for="jobCategory">Specialty</label><select id="jobCategory" required><option value="">Choose a specialty</option><option>Nursing</option><option>Doctors</option><option>Laboratory</option><option>Pharmacy</option><option>Allied Health</option><option>Administration</option><option>Other</option></select></div>
+          <div class="form-group"><label for="jobLocation">Location</label><input id="jobLocation" required maxlength="150" placeholder="City, Country"></div>
+          <div class="form-group"><label for="jobEmploymentType">Employment type</label><select id="jobEmploymentType"><option value="">Choose employment type</option><option>Full-time</option><option>Part-time</option><option>Contract</option><option>Temporary</option><option>Locum</option></select></div>
+          <div class="form-group"><label for="jobSalary">Salary (optional)</label><input id="jobSalary" maxlength="100" placeholder="e.g. Competitive / KSh 80,000 per month"></div>
+          <div class="form-group"><label for="jobDescription">Job description</label><textarea id="jobDescription" required rows="5" maxlength="10000" placeholder="Responsibilities, qualifications and experience required"></textarea></div>
+          <button class="btn btn-primary" id="saveJobDraft" type="submit">Save as draft</button>
+          <p class="status" id="jobFormStatus" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section class="dashboard-section">
+        <div class="dashboard-heading"><h3>Your vacancies</h3><button type="button" class="btn btn-outline btn-small" id="refreshEmployerJobs">Refresh</button></div>
+        <div id="employerJobsList" class="employer-jobs-list"><p class="dashboard-help">Loading your vacancies…</p></div>
+      </section>
+
       <button class="btn btn-outline" type="button" id="employerSignOut">Log out</button>
     </div>
 
@@ -1208,7 +1246,62 @@ async function loadEmployerAccount() {
   document.getElementById("employerAccountName").textContent = profile.organization_name;
   document.getElementById("employerAccountEmail").textContent = user.email || "";
   document.getElementById("employerAccountState").textContent =
-    "Your organisation profile is connected. Job publishing is not enabled until verification is implemented.";
+    "Your organisation profile is connected. Vacancies you create are saved as drafts and are not published publicly.";
+  await loadEmployerJobs(profile);
+}
+
+
+function escapeEmployerHtml(value) {
+  return String(value == null ? "" : value).replace(/[&<>"']/g, function (char) {
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char];
+  });
+}
+
+async function loadEmployerJobs(profile) {
+  const list = document.getElementById("employerJobsList");
+  list.innerHTML = '<p class="dashboard-help">Loading your vacancies…</p>';
+  const { data, error } = await supabaseClient
+    .from("jobs")
+    .select("id, title, category, location, employment_type, salary, status, created_at")
+    .eq("employer_id", profile.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    list.innerHTML = '<p class="dashboard-help">Could not load vacancies. The database may still need the employer-owned jobs read policy. Please apply the database setup SQL provided by CareBridge Jobs.</p>';
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    list.innerHTML = '<p class="dashboard-help">You have not created any vacancies yet. Use the form above to save your first draft.</p>';
+    return;
+  }
+
+  list.innerHTML = data.map(function (job) {
+    const status = String(job.status || "draft").toLowerCase();
+    const date = job.created_at ? new Date(job.created_at).toLocaleDateString() : "";
+    return '<article class="employer-job-card">' +
+      '<h4>' + escapeEmployerHtml(job.title) + '</h4>' +
+      '<p class="employer-job-meta">' + escapeEmployerHtml(job.category) + ' · ' + escapeEmployerHtml(job.location) + '</p>' +
+      '<p class="employer-job-meta">' + escapeEmployerHtml(job.employment_type || "Employment type not specified") + (job.salary ? ' · ' + escapeEmployerHtml(job.salary) : '') + '</p>' +
+      '<span class="job-status ' + escapeEmployerHtml(status) + '">' + escapeEmployerHtml(status) + '</span>' +
+      '<p class="employer-job-meta">Created ' + escapeEmployerHtml(date) + '</p>' +
+      (status === "draft" || status === "published" ? '<button class="btn btn-outline btn-small" type="button" data-close-job="' + escapeEmployerHtml(job.id) + '">Close vacancy</button>' : '') +
+    '</article>';
+  }).join("");
+}
+
+async function closeEmployerJob(jobId, profile) {
+  const { error } = await supabaseClient
+    .from("jobs")
+    .update({ status: "closed" })
+    .eq("id", jobId)
+    .eq("employer_id", profile.id);
+  if (error) {
+    document.getElementById("jobFormStatus").textContent = "Could not close this vacancy: " + error.message;
+    return;
+  }
+  document.getElementById("jobFormStatus").textContent = "Vacancy closed.";
+  await loadEmployerJobs(profile);
 }
 
 async function openEmployerPreview() {
@@ -1292,6 +1385,75 @@ document.getElementById("employerForm").addEventListener("submit", async functio
   } finally {
     submit.disabled = false;
   }
+});
+
+
+document.getElementById("employerJobForm").addEventListener("submit", async function (event) {
+  event.preventDefault();
+  const status = document.getElementById("jobFormStatus");
+  const button = document.getElementById("saveJobDraft");
+  if (!supabaseClient) {
+    status.textContent = "Database connection is unavailable. Please refresh and try again.";
+    return;
+  }
+  const { data: authData, error: authError } = await supabaseClient.auth.getUser();
+  if (authError || !authData.user) {
+    status.textContent = "Your session has expired. Please log in again.";
+    return;
+  }
+  const { data: profile, error: profileError } = await supabaseClient
+    .from("employer_profiles")
+    .select("id, organization_name")
+    .eq("user_id", authData.user.id)
+    .maybeSingle();
+  if (profileError || !profile) {
+    status.textContent = "Your employer profile could not be verified. Please log out and log in again.";
+    return;
+  }
+
+  button.disabled = true;
+  status.textContent = "Saving your vacancy as a draft…";
+  const payload = {
+    employer_id: profile.id,
+    title: document.getElementById("jobTitle").value.trim(),
+    category: document.getElementById("jobCategory").value,
+    organization_name: profile.organization_name,
+    location: document.getElementById("jobLocation").value.trim(),
+    employment_type: document.getElementById("jobEmploymentType").value || null,
+    salary: document.getElementById("jobSalary").value.trim() || null,
+    description: document.getElementById("jobDescription").value.trim(),
+    status: "draft"
+  };
+
+  try {
+    const { error } = await supabaseClient.from("jobs").insert(payload);
+    if (error) throw error;
+    this.reset();
+    status.textContent = "Vacancy saved as a draft. It is not publicly visible.";
+    await loadEmployerJobs(profile);
+  } catch (error) {
+    status.textContent = "Could not save the vacancy: " + (error.message || "Please try again.");
+  } finally {
+    button.disabled = false;
+  }
+});
+
+document.getElementById("refreshEmployerJobs").addEventListener("click", async function () {
+  const { data } = await supabaseClient.auth.getUser();
+  if (!data.user) return;
+  const { data: profile } = await supabaseClient
+    .from("employer_profiles").select("id").eq("user_id", data.user.id).maybeSingle();
+  if (profile) await loadEmployerJobs(profile);
+});
+
+document.getElementById("employerJobsList").addEventListener("click", async function (event) {
+  const button = event.target.closest("[data-close-job]");
+  if (!button) return;
+  const { data } = await supabaseClient.auth.getUser();
+  if (!data.user) return;
+  const { data: profile } = await supabaseClient
+    .from("employer_profiles").select("id").eq("user_id", data.user.id).maybeSingle();
+  if (profile) await closeEmployerJob(button.getAttribute("data-close-job"), profile);
 });
 
 document.getElementById("employerSignOut").addEventListener("click", async function () {
