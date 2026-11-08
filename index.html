@@ -4,734 +4,1214 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="CareBridge Jobs connects healthcare professionals with career opportunities worldwide.">
 <title>CareBridge Jobs | Healthcare Careers Worldwide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+:root {
+  --navy:#10243a;
+  --blue:#1769aa;
+  --teal:#16a6a1;
+  --ink:#172b40;
+  --muted:#66788a;
+  --pale:#f3f8fb;
+  --line:#e2eaf0;
+  --shadow:0 14px 40px rgba(16,36,58,.09);
 }
-
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; }
 body {
-    font-family: Arial, sans-serif;
-    background: #f5f8fc;
-    color: #172b4d;
-    line-height: 1.6;
+  margin:0;
+  font-family:"DM Sans",sans-serif;
+  color:var(--ink);
+  background:white;
+  line-height:1.6;
 }
+button,input,select,textarea { font:inherit; }
+a { text-decoration:none;color:inherit; }
+.container { width:min(1160px,calc(100% - 40px));margin:auto; }
 
+.topbar {
+  background:var(--navy);
+  color:#d9e7f2;
+  font-size:13px;
+  padding:8px 0;
+}
+.topbar .container {
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+  flex-wrap:wrap;
+}
 header {
-    background: white;
-    padding: 18px 7%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 12px #0000000b;
+  position:sticky;
+  top:0;
+  z-index:20;
+  background:rgba(255,255,255,.96);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);
 }
-
-.logo {
-    font-size: 25px;
-    font-weight: 800;
-    color: #087e8b;
+.nav {
+  height:76px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:22px;
 }
-
-nav a {
-    margin-left: 22px;
-    text-decoration: none;
-    color: #33445e;
-    font-weight: 600;
+.brand {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font:800 21px Manrope,sans-serif;
+  color:var(--navy);
+  letter-spacing:-.7px;
+}
+.brand-mark {
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  background:linear-gradient(135deg,var(--blue),var(--teal));
+  display:grid;
+  place-items:center;
+  color:white;
+  font-size:21px;
+}
+.brand em { font-style:normal;color:var(--teal); }
+.navlinks {
+  display:flex;
+  align-items:center;
+  gap:28px;
+  color:#43566a;
+  font-size:14px;
+  font-weight:600;
+}
+.navlinks a:hover { color:var(--blue); }
+.nav-actions { display:flex;gap:10px;align-items:center; }
+.btn {
+  border:0;
+  border-radius:10px;
+  padding:11px 17px;
+  font-weight:700;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  transition:.2s;
+}
+.btn-primary { background:var(--blue);color:white; }
+.btn-primary:hover { background:#10558e;transform:translateY(-1px); }
+.btn-outline {
+  background:white;
+  border:1px solid #cbd8e2;
+  color:var(--navy);
+}
+.btn-outline:hover { border-color:var(--blue);color:var(--blue); }
+.menu-toggle {
+  display:none;
+  background:none;
+  border:0;
+  font-size:25px;
+  color:var(--navy);
 }
 
 .hero {
-    padding: 75px 7%;
-    background: linear-gradient(120deg, #073b4c, #087e8b);
-    color: white;
-    text-align: center;
+  background:
+    radial-gradient(circle at 85% 20%,rgba(22,166,161,.16),transparent 30%),
+    linear-gradient(115deg,#f1f8fc 0%,#f7fbfd 55%,#eaf7f6 100%);
+  padding:82px 0 70px;
+  overflow:hidden;
 }
-
+.hero-grid {
+  display:grid;
+  grid-template-columns:1.12fr .88fr;
+  align-items:center;
+  gap:45px;
+}
+.eyebrow {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  color:#087d83;
+  background:#e1f5f2;
+  border-radius:30px;
+  padding:7px 12px;
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.6px;
+  text-transform:uppercase;
+}
 .hero h1 {
-    font-size: clamp(32px, 5vw, 52px);
-    margin-bottom: 15px;
+  font:800 clamp(38px,5vw,59px)/1.1 Manrope,sans-serif;
+  letter-spacing:-2.4px;
+  color:var(--navy);
+  margin:19px 0;
 }
+.hero h1 span { color:var(--blue); }
+.hero-copy {
+  font-size:17px;
+  color:#5d7082;
+  max-width:580px;
+  margin:0 0 28px;
+}
+.search-panel {
+  background:white;
+  border:1px solid var(--line);
+  box-shadow:var(--shadow);
+  padding:10px;
+  border-radius:14px;
+  display:flex;
+  gap:8px;
+  max-width:690px;
+}
+.search-field { flex:1;min-width:0;padding:7px 12px; }
+.search-field label {
+  display:block;
+  font-size:11px;
+  font-weight:800;
+  color:#718293;
+  text-transform:uppercase;
+  letter-spacing:.6px;
+}
+.search-field input {
+  width:100%;
+  border:0;
+  outline:0;
+  padding:4px 0;
+  color:var(--ink);
+  background:transparent;
+}
+.search-panel .btn { padding:14px 22px; }
+.hero-note { font-size:12px;color:#718293;margin-top:13px; }
+.hero-art {
+  position:relative;
+  min-height:340px;
+  display:grid;
+  place-items:center;
+}
+.art-circle {
+  width:min(340px,80vw);
+  height:min(340px,80vw);
+  border-radius:50%;
+  background:linear-gradient(145deg,#d9f0f0,#dcecf8);
+  display:grid;
+  place-items:center;
+  position:relative;
+}
+.art-card {
+  background:white;
+  border-radius:18px;
+  padding:22px;
+  box-shadow:var(--shadow);
+  width:245px;
+  position:relative;
+  z-index:2;
+}
+.big-icon {
+  width:54px;
+  height:54px;
+  border-radius:16px;
+  background:#e5f5f3;
+  display:grid;
+  place-items:center;
+  font-size:28px;
+}
+.art-card h3 { font:800 18px Manrope;margin:14px 0 4px; }
+.art-card p { font-size:13px;color:var(--muted);margin:0; }
+.float-chip {
+  position:absolute;
+  background:white;
+  padding:12px 15px;
+  border-radius:12px;
+  box-shadow:var(--shadow);
+  font-size:12px;
+  font-weight:700;
+}
+.chip-one { top:45px;right:0; }
+.chip-two { bottom:38px;left:-5px; }
 
-.hero p {
-    font-size: 18px;
-    margin-bottom: 28px;
-    color: #e4f7f8;
+.trust { padding:24px 0;border-bottom:1px solid var(--line); }
+.trust-row {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  flex-wrap:wrap;
+  color:#6c7d8c;
+  font-size:13px;
 }
-
-.search {
-    display: flex;
-    gap: 10px;
-    max-width: 750px;
-    margin: auto;
-    flex-wrap: wrap;
+.trust-logos {
+  display:flex;
+  gap:28px;
+  align-items:center;
+  flex-wrap:wrap;
+  color:#8292a0;
+  font:800 15px Manrope;
 }
-
-.search input {
-    flex: 1;
-    min-width: 180px;
-    padding: 16px;
-    border: 0;
-    border-radius: 7px;
-    font-size: 15px;
+section { padding:76px 0; }
+.section-head {
+  text-align:center;
+  max-width:660px;
+  margin:0 auto 38px;
 }
-
-button {
-    background: #f4a261;
-    color: #172b4d;
-    border: 0;
-    padding: 14px 22px;
-    border-radius: 7px;
-    font-weight: bold;
-    cursor: pointer;
+.section-kicker {
+  color:var(--teal);
+  font-size:12px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:1px;
 }
-
-button:hover {
-    opacity: .9;
+.section-head h2 {
+  font:800 clamp(28px,4vw,38px)/1.2 Manrope;
+  color:var(--navy);
+  letter-spacing:-1px;
+  margin:9px 0 12px;
 }
-
-section {
-    padding: 55px 7%;
-}
-
-.section-title {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.section-title h2 {
-    font-size: 30px;
-    margin-bottom: 8px;
-}
+.section-head p { color:var(--muted);margin:0; }
 
 .categories {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 15px;
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:14px;
 }
-
 .category {
-    background: white;
-    padding: 22px 12px;
-    text-align: center;
-    border-radius: 10px;
-    box-shadow: 0 3px 14px #00000008;
-    font-weight: bold;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:22px 12px;
+  text-align:center;
+  cursor:pointer;
+  transition:.2s;
+  background:white;
 }
-
-.jobs {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 20px;
+.category:hover,.category.active {
+  border-color:#82c9c6;
+  box-shadow:0 8px 24px rgba(22,166,161,.1);
+  transform:translateY(-3px);
 }
-
-.job {
-    background: white;
-    padding: 24px;
-    border-radius: 12px;
-    box-shadow: 0 4px 18px #0000000b;
+.category-icon {
+  width:49px;
+  height:49px;
+  border-radius:14px;
+  background:#edf6fa;
+  display:grid;
+  place-items:center;
+  margin:0 auto 12px;
+  font-size:23px;
 }
+.category strong { display:block;font-size:13px; }
+.category small { color:#8493a0;font-size:11px; }
 
-.job h3 {
-    margin: 12px 0 5px;
+.jobs-section { background:var(--pale); }
+.jobs-top {
+  display:flex;
+  justify-content:space-between;
+  align-items:end;
+  gap:20px;
+  margin-bottom:25px;
 }
-
-.job p {
-    color: #63738a;
-    margin: 5px 0;
+.jobs-top h2 { font:800 31px Manrope;color:var(--navy);margin:0; }
+.jobs-top p { margin:5px 0 0;color:var(--muted);font-size:14px; }
+.filter-select {
+  padding:11px 14px;
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:white;
+  color:var(--ink);
 }
-
+.job-grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+}
+.job-card {
+  background:white;
+  border:1px solid var(--line);
+  border-radius:15px;
+  padding:22px;
+  display:flex;
+  flex-direction:column;
+  min-height:290px;
+  transition:.2s;
+}
+.job-card:hover { box-shadow:var(--shadow);transform:translateY(-3px); }
+.job-card-top {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+.company-logo {
+  width:45px;
+  height:45px;
+  border-radius:12px;
+  background:#eaf4fa;
+  color:var(--blue);
+  display:grid;
+  place-items:center;
+  font-weight:800;
+  font-size:18px;
+}
 .tag {
-    display: inline-block;
-    background: #e3f5f5;
-    color: #087e8b;
-    padding: 5px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: bold;
+  font-size:10px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+  padding:6px 9px;
+  border-radius:20px;
+  background:#fff4df;
+  color:#a46a00;
+}
+.job-card h3 {
+  font:800 18px Manrope;
+  margin:18px 0 5px;
+  color:var(--navy);
+}
+.company { font-size:13px;color:#6d7e8e; }
+.job-meta {
+  display:flex;
+  gap:13px;
+  flex-wrap:wrap;
+  margin:16px 0;
+  color:#607284;
+  font-size:12px;
+}
+.job-meta span { display:inline-flex;gap:5px;align-items:center; }
+.job-card-bottom {
+  margin-top:auto;
+  padding-top:15px;
+  border-top:1px solid #edf1f4;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+.salary { font-size:12px;font-weight:700;color:#43596b; }
+.text-link {
+  border:0;
+  background:none;
+  color:var(--blue);
+  font-weight:800;
+  font-size:13px;
+  cursor:pointer;
+  padding:5px;
+}
+.demo-note {
+  margin:22px auto 0;
+  text-align:center;
+  color:#758696;
+  font-size:12px;
+  max-width:760px;
 }
 
-.job button {
-    margin-top: 16px;
-    width: 100%;
+.how-grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:24px;
+}
+.how-card { text-align:center;padding:25px; }
+.how-number {
+  width:58px;
+  height:58px;
+  border-radius:18px;
+  background:#e7f5f4;
+  color:#087e80;
+  display:grid;
+  place-items:center;
+  font:800 21px Manrope;
+  margin:0 auto 18px;
+}
+.how-card h3 { font:800 17px Manrope;margin:0 0 8px; }
+.how-card p { font-size:13px;color:var(--muted);margin:0; }
+
+.cta { padding:0 0 76px; }
+.cta-panel {
+  background:linear-gradient(110deg,#102d49,#1769aa);
+  border-radius:20px;
+  padding:44px 48px;
+  color:white;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:24px;
+}
+.cta-panel h2 { font:800 29px Manrope;margin:0 0 8px; }
+.cta-panel p { color:#d2e2ef;margin:0;font-size:14px; }
+.cta-panel .btn { background:white;color:var(--navy);white-space:nowrap; }
+
+footer { background:#0e2033;color:#d6e2ec;padding:55px 0 22px; }
+.footer-grid {
+  display:grid;
+  grid-template-columns:1.5fr 1fr 1fr 1fr;
+  gap:35px;
+}
+.footer-brand { color:white; }
+.footer-about { font-size:13px;color:#a9bac8;max-width:300px;margin:15px 0; }
+.footer-col h4 { color:white;font:700 13px Manrope;margin:0 0 15px; }
+.footer-col a { display:block;color:#a9bac8;font-size:12px;margin:9px 0; }
+.footer-col a:hover { color:white; }
+.footer-bottom {
+  border-top:1px solid #294056;
+  margin-top:35px;
+  padding-top:18px;
+  color:#91a5b6;
+  font-size:11px;
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
 }
 
-.notice {
-    font-size: 13px;
-    color: #8a5b16;
-    background: #fff4dc;
-    padding: 12px;
-    border-radius: 7px;
-    margin-top: 20px;
-    text-align: center;
+.modal-backdrop {
+  position:fixed;
+  inset:0;
+  background:rgba(7,21,35,.62);
+  z-index:50;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
 }
-
-.employer {
-    background: #e7f5f6;
-    text-align: center;
-}
-
-.employer p {
-    margin: 10px auto 20px;
-    max-width: 650px;
-}
-
-footer {
-    background: #102f40;
-    color: white;
-    padding: 30px 7%;
-    text-align: center;
-}
-
-footer p {
-    color: #c4d5df;
-    font-size: 14px;
-}
-
-.database-status {
-    margin: 18px auto 0;
-    padding: 12px;
-    max-width: 500px;
-    border-radius: 7px;
-    background: #1b4050;
-    color: white;
-    font-size: 13px;
-}
-
-.database-status button {
-    margin-top: 10px;
-}
-
+.modal-backdrop.open { display:flex; }
 .modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: #0009;
-    z-index: 10;
-    padding: 20px;
-    overflow: auto;
+  background:white;
+  width:min(560px,100%);
+  max-height:90vh;
+  overflow:auto;
+  border-radius:17px;
+  padding:27px;
+  box-shadow:0 25px 80px rgba(0,0,0,.25);
+  position:relative;
 }
-
-.modal-content {
-    background: white;
-    max-width: 600px;
-    margin: 35px auto;
-    padding: 28px;
-    border-radius: 12px;
-    position: relative;
+.modal-close {
+  position:absolute;
+  right:16px;
+  top:12px;
+  border:0;
+  background:#f0f4f7;
+  border-radius:50%;
+  width:34px;
+  height:34px;
+  font-size:20px;
+  cursor:pointer;
 }
-
-.close {
-    position: absolute;
-    right: 18px;
-    top: 12px;
-    background: #edf2f7;
-    padding: 7px 12px;
+.modal h2 {
+  font:800 23px Manrope;
+  color:var(--navy);
+  margin:5px 35px 8px 0;
 }
-
-.modal-content h2 {
-    margin: 12px 0;
+.modal p { font-size:13px;color:var(--muted); }
+.form-grid { display:grid;grid-template-columns:1fr 1fr;gap:13px; }
+.form-group { margin:12px 0; }
+.form-group.full { grid-column:1/-1; }
+.form-group label { display:block;font-size:12px;font-weight:700;margin-bottom:5px; }
+.form-group input,.form-group textarea {
+  width:100%;
+  border:1px solid #d9e3ea;
+  border-radius:8px;
+  padding:11px;
+  outline:none;
+  background:white;
 }
-
-.modal-content p {
-    margin: 8px 0;
-    color: #53657a;
+.form-group input:focus,.form-group textarea:focus { border-color:var(--blue); }
+.form-group textarea { min-height:90px;resize:vertical; }
+.modal .btn { width:100%;margin-top:8px; }
+.notice {
+  padding:12px 14px;
+  border-radius:9px;
+  background:#fff6e7;
+  color:#855a11;
+  font-size:12px;
+  margin-top:12px;
 }
+.status { font-size:12px;color:#a9bac8;margin-top:8px;min-height:18px; }
 
-form label {
-    display: block;
-    margin-top: 14px;
-    font-weight: bold;
+@media(max-width:900px) {
+  .hero-grid { grid-template-columns:1fr .7fr;gap:15px; }
+  .categories { grid-template-columns:repeat(3,1fr); }
+  .job-grid { grid-template-columns:repeat(2,1fr); }
+  .footer-grid { grid-template-columns:1.3fr 1fr 1fr; }
+  .footer-col:last-child { display:none; }
 }
-
-form input,
-form textarea {
-    width: 100%;
-    padding: 12px;
-    margin-top: 6px;
-    border: 1px solid #ccd5df;
-    border-radius: 6px;
-    font: inherit;
-}
-
-form button {
-    margin-top: 18px;
-    width: 100%;
-}
-
-@media(max-width: 650px) {
-    header {
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    nav a {
-        margin: 0 7px;
-        font-size: 13px;
-    }
-
-    .hero {
-        padding: 55px 5%;
-    }
-
-    section {
-        padding: 40px 5%;
-    }
+@media(max-width:680px) {
+  .container { width:min(100% - 30px,1160px); }
+  .topbar .container { justify-content:center; }
+  .nav { height:66px; }
+  .menu-toggle { display:block; }
+  .navlinks {
+    display:none;
+    position:absolute;
+    top:66px;
+    left:0;
+    right:0;
+    background:white;
+    padding:18px 22px 22px;
+    border-bottom:1px solid var(--line);
+    flex-direction:column;
+    align-items:flex-start;
+    gap:17px;
+  }
+  .navlinks.show { display:flex; }
+  .nav-actions .btn-outline { display:none; }
+  .nav-actions .btn { padding:9px 12px;font-size:12px; }
+  .hero { padding:55px 0 45px; }
+  .hero-grid { grid-template-columns:1fr; }
+  .hero h1 { font-size:42px; }
+  .hero-art { min-height:270px; }
+  .art-circle { width:260px;height:260px; }
+  .art-card { width:210px;padding:17px; }
+  .chip-one { right:3px;top:22px; }
+  .chip-two { left:0;bottom:15px; }
+  .search-panel { flex-direction:column; }
+  .search-field { padding:6px 10px; }
+  .search-panel .btn { width:100%; }
+  section { padding:57px 0; }
+  .categories { grid-template-columns:repeat(2,1fr);gap:10px; }
+  .category { padding:17px 8px; }
+  .job-grid { grid-template-columns:1fr; }
+  .jobs-top { align-items:flex-start;flex-direction:column; }
+  .how-grid { grid-template-columns:1fr;gap:5px; }
+  .cta-panel {
+    padding:30px 23px;
+    align-items:flex-start;
+    flex-direction:column;
+  }
+  .cta-panel h2 { font-size:24px; }
+  .footer-grid { grid-template-columns:1fr 1fr; }
+  .footer-grid>div:first-child { grid-column:1/-1; }
+  .footer-col:last-child { display:block; }
+  .form-grid { grid-template-columns:1fr; }
+  .form-group.full { grid-column:auto; }
+  .modal { padding:22px; }
+  .trust-logos { gap:15px; }
 }
 </style>
 </head>
 
 <body>
 
-<header>
-    <div class="logo">CareBridge Jobs</div>
+<div class="topbar">
+  <div class="container">
+    <span>Connecting healthcare talent with opportunities worldwide</span>
+    <span>For healthcare professionals &amp; employers</span>
+  </div>
+</div>
 
-    <nav>
-        <a href="#home">Home</a>
-        <a href="#categories">Categories</a>
-        <a href="#jobs">Find Jobs</a>
-        <a href="#employers">Employers</a>
+<header>
+  <div class="container nav">
+    <a class="brand" href="#">
+      <span class="brand-mark">✚</span>
+      <span>CareBridge <em>Jobs</em></span>
+    </a>
+
+    <button class="menu-toggle" id="menuToggle" aria-label="Open navigation" aria-expanded="false">☰</button>
+
+    <nav class="navlinks" id="navLinks">
+      <a href="#jobs">Find Jobs</a>
+      <a href="#categories">Specialties</a>
+      <a href="#how">How It Works</a>
+      <a href="#employers">For Employers</a>
     </nav>
+
+    <div class="nav-actions">
+      <button class="btn btn-outline" id="employerNav">Post a Job</button>
+      <a class="btn btn-primary" href="#jobs">Explore Jobs</a>
+    </div>
+  </div>
 </header>
 
-<div class="hero" id="home">
-    <h1>Your Healthcare Career Starts Here</h1>
-    <p>
-        Discover healthcare career opportunities and connect
-        with employers around the world.
-    </p>
+<main>
 
-    <div class="search">
-        <input id="keyword" type="text"
-               placeholder="Job title or profession">
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <span class="eyebrow">✦ Your next chapter starts here</span>
+      <h1>Careers that care.<br><span>Opportunities</span> without borders.</h1>
+      <p class="hero-copy">
+        Discover healthcare career opportunities and take your professional journey further.
+        Find roles that match your skills, experience and ambitions.
+      </p>
 
-        <input id="location" type="text"
-               placeholder="Country or city">
+      <form class="search-panel" id="searchForm">
+        <div class="search-field">
+          <label for="keyword">Job title or keyword</label>
+          <input id="keyword" type="search" placeholder="e.g. Registered Nurse">
+        </div>
+        <div class="search-field">
+          <label for="location">Location</label>
+          <input id="location" type="search" placeholder="City or country">
+        </div>
+        <button class="btn btn-primary" type="submit">Search jobs →</button>
+      </form>
 
-        <button onclick="searchJobs()">Search Jobs</button>
+      <div class="hero-note">
+        Explore opportunities across nursing, medicine, diagnostics and more.
+      </div>
     </div>
+
+    <div class="hero-art">
+      <div class="art-circle">
+        <div class="art-card">
+          <div class="big-icon">⚕</div>
+          <h3>Make your next move</h3>
+          <p>Connect your healthcare experience with new possibilities.</p>
+        </div>
+      </div>
+      <div class="float-chip chip-one">🌍 Global opportunities</div>
+      <div class="float-chip chip-two">♡ Careers that matter</div>
+    </div>
+  </div>
+</section>
+
+<div class="trust">
+  <div class="container trust-row">
+    <span>Explore roles across healthcare disciplines</span>
+    <div class="trust-logos">
+      <span>NURSING</span>
+      <span>MEDICINE</span>
+      <span>DIAGNOSTICS</span>
+      <span>ALLIED HEALTH</span>
+    </div>
+  </div>
 </div>
 
 <section id="categories">
-    <div class="section-title">
-        <h2>Explore Healthcare Careers</h2>
-        <p>Find opportunities across different healthcare professions.</p>
+  <div class="container">
+    <div class="section-head">
+      <span class="section-kicker">Explore specialties</span>
+      <h2>Find your place in healthcare</h2>
+      <p>Browse opportunities by professional area and discover roles where your skills can make a difference.</p>
     </div>
 
     <div class="categories">
-        <div class="category">🩺<br>Doctors</div>
-        <div class="category">🏥<br>Nursing</div>
-        <div class="category">🔬<br>Laboratory</div>
-        <div class="category">💊<br>Pharmacy</div>
-        <div class="category">🦷<br>Dentistry</div>
-        <div class="category">📋<br>Administration</div>
+      <button class="category" data-category="Nursing">
+        <span class="category-icon">🩺</span>
+        <strong>Nursing</strong>
+        <small>Care &amp; support</small>
+      </button>
+      <button class="category" data-category="Doctors">
+        <span class="category-icon">⚕️</span>
+        <strong>Doctors</strong>
+        <small>Medical practice</small>
+      </button>
+      <button class="category" data-category="Laboratory">
+        <span class="category-icon">🧪</span>
+        <strong>Laboratory</strong>
+        <small>Diagnostics</small>
+      </button>
+      <button class="category" data-category="Pharmacy">
+        <span class="category-icon">💊</span>
+        <strong>Pharmacy</strong>
+        <small>Medicines</small>
+      </button>
+      <button class="category" data-category="Allied Health">
+        <span class="category-icon">🫶</span>
+        <strong>Allied Health</strong>
+        <small>Patient services</small>
+      </button>
+      <button class="category" data-category="Administration">
+        <span class="category-icon">📋</span>
+        <strong>Administration</strong>
+        <small>Health operations</small>
+      </button>
     </div>
+  </div>
 </section>
 
-<section id="jobs">
-    <div class="section-title">
-        <h2>Featured Opportunities</h2>
-        <p>
-            Explore example listings. These are demonstration jobs,
-            not verified vacancies.
-        </p>
+<section class="jobs-section" id="jobs">
+  <div class="container">
+    <div class="jobs-top">
+      <div>
+        <span class="section-kicker">Explore opportunities</span>
+        <h2>Featured opportunities</h2>
+        <p>Browse example listings and see how opportunities will appear.</p>
+      </div>
+
+      <select class="filter-select" id="sortFilter" aria-label="Filter jobs">
+        <option value="all">All opportunities</option>
+        <option value="Nursing">Nursing</option>
+        <option value="Laboratory">Laboratory</option>
+        <option value="Doctors">Doctors</option>
+      </select>
     </div>
 
-    <div class="jobs" id="jobList">
+    <div class="job-grid" id="jobGrid">
 
-        <div class="job"
-             data-title="Registered Nurse"
-             data-location="London UK">
-
-            <span class="tag">Nursing</span>
-            <h3>Registered Nurse</h3>
-            <p>Example Hospital · London, UK</p>
-            <p>Full-time · Competitive salary</p>
-
-            <button onclick="showJob(
-                'Registered Nurse',
-                'Example Hospital',
-                'London, UK',
-                'Nursing',
-                'Full-time',
-                'Competitive salary',
-                'Provide professional patient care, support clinical teams and maintain high standards of nursing practice.'
-            )">View opportunity</button>
+      <article class="job-card"
+        data-category="Nursing"
+        data-title="Registered Nurse"
+        data-location="London UK"
+        data-description="Example listing for a Registered Nurse role. This is demonstration content, not a verified vacancy.">
+        <div class="job-card-top">
+          <div class="company-logo">EH</div>
+          <span class="tag">Nursing</span>
         </div>
-
-        <div class="job"
-             data-title="Medical Laboratory Technologist"
-             data-location="Toronto Canada">
-
-            <span class="tag">Laboratory</span>
-            <h3>Medical Laboratory Technologist</h3>
-            <p>Example Medical Centre · Toronto, Canada</p>
-            <p>Full-time · Competitive salary</p>
-
-            <button onclick="showJob(
-                'Medical Laboratory Technologist',
-                'Example Medical Centre',
-                'Toronto, Canada',
-                'Laboratory',
-                'Full-time',
-                'Competitive salary',
-                'Perform laboratory investigations, maintain equipment and support accurate diagnostic testing.'
-            )">View opportunity</button>
+        <h3>Registered Nurse</h3>
+        <div class="company">Example Hospital · London, UK</div>
+        <div class="job-meta">
+          <span>◷ Full-time</span>
+          <span>⌖ London, UK</span>
         </div>
-
-        <div class="job"
-             data-title="General Practitioner"
-             data-location="Nairobi Kenya">
-
-            <span class="tag">Doctors</span>
-            <h3>General Practitioner</h3>
-            <p>Example Health Centre · Nairobi, Kenya</p>
-            <p>Full-time · Competitive salary</p>
-
-            <button onclick="showJob(
-                'General Practitioner',
-                'Example Health Centre',
-                'Nairobi, Kenya',
-                'Doctors',
-                'Full-time',
-                'Competitive salary',
-                'Provide primary healthcare consultations, assess patients and coordinate appropriate treatment.'
-            )">View opportunity</button>
+        <div class="job-card-bottom">
+          <span class="salary">Competitive salary</span>
+          <button class="text-link view-job">View opportunity →</button>
         </div>
+      </article>
+
+      <article class="job-card"
+        data-category="Laboratory"
+        data-title="Medical Laboratory Technologist"
+        data-location="Toronto Canada"
+        data-description="Example listing for a Medical Laboratory Technologist role. This is demonstration content, not a verified vacancy.">
+        <div class="job-card-top">
+          <div class="company-logo">EM</div>
+          <span class="tag">Laboratory</span>
+        </div>
+        <h3>Medical Laboratory Technologist</h3>
+        <div class="company">Example Medical Centre · Toronto, Canada</div>
+        <div class="job-meta">
+          <span>◷ Full-time</span>
+          <span>⌖ Toronto, Canada</span>
+        </div>
+        <div class="job-card-bottom">
+          <span class="salary">Competitive salary</span>
+          <button class="text-link view-job">View opportunity →</button>
+        </div>
+      </article>
+
+      <article class="job-card"
+        data-category="Doctors"
+        data-title="General Practitioner"
+        data-location="Nairobi Kenya"
+        data-description="Example listing for a General Practitioner role. This is demonstration content, not a verified vacancy.">
+        <div class="job-card-top">
+          <div class="company-logo">EH</div>
+          <span class="tag">Doctors</span>
+        </div>
+        <h3>General Practitioner</h3>
+        <div class="company">Example Health Centre · Nairobi, Kenya</div>
+        <div class="job-meta">
+          <span>◷ Full-time</span>
+          <span>⌖ Nairobi, Kenya</span>
+        </div>
+        <div class="job-card-bottom">
+          <span class="salary">Competitive salary</span>
+          <button class="text-link view-job">View opportunity →</button>
+        </div>
+      </article>
 
     </div>
 
-    <div class="notice">
-        Demonstration listings only. These are not verified vacancies
-        and are not accepting real applications.
-    </div>
-
-    <p id="noResults"
-       style="display:none;text-align:center;margin-top:20px">
-        No matching demonstration opportunities found.
+    <p class="demo-note">
+      These are demonstration listings only. They are not verified vacancies and are not open for real applications.
     </p>
+  </div>
 </section>
 
-<section class="employer" id="employers">
-    <div class="section-title">
-        <h2>Are You a Healthcare Employer?</h2>
-        <p>
-            CareBridge Jobs aims to help healthcare organisations
-            connect with qualified professionals.
-        </p>
-        <button onclick="showEmployer()">
-            Register Employer Interest
-        </button>
+<section id="how">
+  <div class="container">
+    <div class="section-head">
+      <span class="section-kicker">Simple process</span>
+      <h2>A clearer path to your next opportunity</h2>
+      <p>CareBridge Jobs is being developed to make healthcare career discovery easier.</p>
     </div>
+
+    <div class="how-grid">
+      <div class="how-card">
+        <div class="how-number">01</div>
+        <h3>Explore opportunities</h3>
+        <p>Search roles by keyword, specialty and location.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-number">02</div>
+        <h3>Review role details</h3>
+        <p>Learn about the employer, location and role requirements.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-number">03</div>
+        <h3>Connect with employers</h3>
+        <p>When the platform is ready, candidates will be able to submit applications through secure workflows.</p>
+      </div>
+    </div>
+  </div>
 </section>
+
+<section class="cta" id="employers">
+  <div class="container">
+    <div class="cta-panel">
+      <div>
+        <h2>Looking for healthcare talent?</h2>
+        <p>We're building a platform to help healthcare employers reach qualified professionals.</p>
+      </div>
+      <button class="btn" id="employerCta">I'm an employer →</button>
+    </div>
+  </div>
+</section>
+
+</main>
 
 <footer>
-    <h3>CareBridge Jobs</h3>
-    <p>
-        Connecting healthcare talent with opportunities worldwide.
-    </p>
-    <p>© 2026 CareBridge Jobs. All rights reserved.</p>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a class="brand footer-brand" href="#">
+          <span class="brand-mark">✚</span>
+          <span>CareBridge <em>Jobs</em></span>
+        </a>
+        <p class="footer-about">
+          A healthcare careers platform concept connecting professionals and employers across borders.
+        </p>
+      </div>
 
-    <div class="database-status">
-        <strong>Database connection:</strong>
-        <p id="databaseStatus">Checking configuration...</p>
+      <div class="footer-col">
+        <h4>For Candidates</h4>
+        <a href="#jobs">Explore opportunities</a>
+        <a href="#categories">Browse specialties</a>
+        <a href="#how">How it works</a>
+      </div>
 
-        <button onclick="testDatabaseConnection()">
-            Test Database Connection
-        </button>
+      <div class="footer-col">
+        <h4>For Employers</h4>
+        <a href="#employers">Employer information</a>
+        <a href="#employers" id="footerPost">Post a job (preview)</a>
+      </div>
+
+      <div class="footer-col">
+        <h4>CareBridge</h4>
+        <a href="#how">About the platform</a>
+        <a href="mailto:hello@carebridgejobs.example">Contact (preview)</a>
+      </div>
     </div>
+
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> CareBridge Jobs. All rights reserved.</span>
+      <span>Platform preview · Demonstration listings only</span>
+    </div>
+
+    <div class="status" id="databaseStatus" role="status">
+      Checking Supabase configuration…
+    </div>
+    <button class="text-link" id="testDatabase" style="color:#9ddbd7;padding-left:0">
+      Test database connection
+    </button>
+  </div>
 </footer>
 
-<div class="modal" id="jobModal">
-    <div class="modal-content">
-        <button class="close"
-                onclick="closeModal('jobModal')">✕</button>
+<!-- JOB DETAILS MODAL -->
+<div class="modal-backdrop" id="jobModal" role="dialog" aria-modal="true" aria-labelledby="jobModalTitle">
+  <div class="modal">
+    <button class="modal-close" data-close aria-label="Close">×</button>
+    <span class="section-kicker">Example opportunity</span>
+    <h2 id="jobModalTitle">Job title</h2>
+    <div id="jobModalCompany"></div>
+    <p id="jobModalDescription"></p>
+    <div class="notice">
+      Demonstration only: this is not a verified vacancy. Applications are not being accepted through this preview.
+    </div>
+    <button class="btn btn-primary" id="previewApply">Application process preview</button>
+  </div>
+</div>
 
-        <span class="tag" id="jobCategory"></span>
-        <h2 id="jobTitle"></h2>
-        <p id="jobEmployer"></p>
-        <p id="jobLocation"></p>
-        <p id="jobType"></p>
-        <p id="jobSalary"></p>
+<!-- EMPLOYER MODAL -->
+<div class="modal-backdrop" id="employerModal" role="dialog" aria-modal="true" aria-labelledby="employerModalTitle">
+  <div class="modal">
+    <button class="modal-close" data-close aria-label="Close">×</button>
+    <h2 id="employerModalTitle">Employer interest</h2>
+    <p>This preview shows the intended employer enquiry flow. It does not submit or store information.</p>
 
-        <h3 style="margin-top:20px">About this opportunity</h3>
-        <p id="jobDescription"></p>
-
-        <div class="notice">
-            This is a demonstration listing, not a verified vacancy.
+    <form id="employerForm">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="employerName">Your name</label>
+          <input id="employerName" required placeholder="Full name">
         </div>
 
-        <h3 style="margin-top:20px">Application form preview</h3>
+        <div class="form-group">
+          <label for="employerEmail">Work email</label>
+          <input id="employerEmail" type="email" required placeholder="name@company.com">
+        </div>
 
-        <form onsubmit="previewApplication(event)">
-            <label>Full name</label>
-            <input required placeholder="Enter your full name">
+        <div class="form-group full">
+          <label for="companyName">Organisation</label>
+          <input id="companyName" required placeholder="Healthcare organisation">
+        </div>
 
-            <label>Email address</label>
-            <input type="email" required placeholder="Enter your email">
+        <div class="form-group full">
+          <label for="employerMessage">What would you like to do?</label>
+          <textarea id="employerMessage" placeholder="Tell us about your recruitment needs"></textarea>
+        </div>
+      </div>
 
-            <label>Phone number</label>
-            <input required placeholder="Enter your phone number">
-
-            <label>Short introduction</label>
-            <textarea required rows="4"
-                      placeholder="Tell us about your experience"></textarea>
-
-            <button type="submit">Preview Application</button>
-        </form>
-
-        <p id="applicationMessage" style="margin-top:12px"></p>
-    </div>
+      <div class="notice">
+        Preview only. Do not enter confidential or sensitive information.
+      </div>
+      <button class="btn btn-primary" type="submit">Preview enquiry</button>
+      <div class="status" id="employerStatus"></div>
+    </form>
+  </div>
 </div>
 
-<div class="modal" id="employerModal">
-    <div class="modal-content">
-        <button class="close"
-                onclick="closeModal('employerModal')">✕</button>
-
-        <h2>Employer Interest Form</h2>
-        <p>
-            This is a demonstration form. It does not send or save information.
-        </p>
-
-        <form onsubmit="previewEmployer(event)">
-            <label>Organisation name</label>
-            <input required placeholder="Hospital or organisation name">
-
-            <label>Contact person's name</label>
-            <input required placeholder="Your full name">
-
-            <label>Work email</label>
-            <input type="email" required placeholder="Your work email">
-
-            <label>What kind of staff are you looking for?</label>
-            <textarea required rows="4"
-                      placeholder="Describe your recruitment needs"></textarea>
-
-            <button type="submit">Preview Employer Request</button>
-        </form>
-
-        <p id="employerMessage"></p>
-    </div>
+<!-- INFORMATION MODAL -->
+<div class="modal-backdrop" id="infoModal" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+  <div class="modal">
+    <button class="modal-close" data-close aria-label="Close">×</button>
+    <h2 id="infoTitle">Preview</h2>
+    <p id="infoText"></p>
+    <button class="btn btn-primary" data-close>Close</button>
+  </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
+"use strict";
 
-/* =====================================
-   SUPABASE CONFIGURATION
-===================================== */
-
-const SUPABASE_URL =
-    "https://icsbgvuesaklfjoucvqc.supabase.co";
-
-/*
-  PASTE YOUR NEW SUPABASE PUBLISHABLE KEY
-  BETWEEN THE QUOTATION MARKS BELOW.
-  Never use your secret or service-role key.
+/* SUPABASE CONFIGURATION
+   Use the Publishable key for this project.
+   Never use a secret/service_role key in frontend code.
 */
+const SUPABASE_URL = "https://icsbgvuesaklfjoucvqc.supabase.co";
 
-const SUPABASE_PUBLISHABLE_KEY =
-    "sb_publishable_jAZNB_j1RyzxfHN_3WyInw_083EsS3I";
+const SUPABASE_PUBLISHABLE_KEY = "PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE";
 
 let supabaseClient = null;
 
-/* =====================================
-   INITIALIZE SUPABASE
-===================================== */
+function setStatus(message) {
+  const status = document.getElementById("databaseStatus");
+  if (status) {
+    status.textContent = message;
+  }
+}
 
 function initializeSupabase() {
+  if (!window.supabase || typeof window.supabase.createClient !== "function") {
+    setStatus("Supabase library could not be loaded. Check your internet connection and refresh.");
+    return;
+  }
 
-    const status = document.getElementById("databaseStatus");
+  if (
+    !SUPABASE_PUBLISHABLE_KEY ||
+    SUPABASE_PUBLISHABLE_KEY === "PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE"
+  ) {
+    setStatus("Supabase is not configured yet. Add your project's Publishable key in the code.");
+    return;
+  }
 
-    if (!window.supabase) {
-        status.textContent = "Supabase library could not be loaded.";
-        return;
-    }
+  try {
+    supabaseClient = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY
+    );
 
-    if (
-        !SUPABASE_PUBLISHABLE_KEY ||
-        SUPABASE_PUBLISHABLE_KEY ===
-        "sb_publishable_jAZNB_j1RyzxfHN_3WyInw_083EsS3I"
-    ) {
-        status.textContent = "Publishable key still needs to be added.";
-        return;
-    }
-
-    try {
-        supabaseClient = window.supabase.createClient(
-            SUPABASE_URL,
-            SUPABASE_PUBLISHABLE_KEY
-        );
-
-        status.textContent =
-            "Supabase client initialized. Database test not yet completed.";
-
-    } catch (error) {
-        status.textContent = "Initialization failed: " + error.message;
-    }
+    setStatus("Supabase client initialized. Use the test button to check the database.");
+  } catch (error) {
+    setStatus("Supabase initialization failed: " + (error.message || "Unknown error"));
+  }
 }
-
-/* =====================================
-   TEST DATABASE CONNECTION
-===================================== */
 
 async function testDatabaseConnection() {
+  if (!supabaseClient) {
+    setStatus("Database test unavailable: configure the Publishable key first.");
+    return;
+  }
 
-    const status = document.getElementById("databaseStatus");
+  setStatus("Testing database connection…");
 
-    if (!supabaseClient) {
-        initializeSupabase();
+  try {
+    const { error } = await supabaseClient
+      .from("jobs")
+      .select("id")
+      .limit(1);
+
+    if (error) {
+      throw error;
     }
 
-    if (!supabaseClient) return;
-
-    status.textContent = "Testing database connection...";
-
-    try {
-
-        const { data, error } = await supabaseClient
-            .from("jobs")
-            .select("id")
-            .limit(1);
-
-        if (error) throw error;
-
-        status.textContent =
-            "Database connection successful. Jobs table is accessible.";
-
-        console.log("Supabase test successful:", data);
-
-    } catch (error) {
-
-        status.textContent =
-            "Database test failed: " + error.message;
-
-        console.error("Supabase connection error:", error);
-    }
+    setStatus("Database connection successful. The jobs table responded.");
+  } catch (error) {
+    setStatus("Database test failed: " + (error.message || "Unknown error"));
+  }
 }
 
-/* =====================================
-   JOB DETAILS
-===================================== */
+/* MOBILE NAVIGATION */
+const menuToggle = document.getElementById("menuToggle");
+const navLinks = document.getElementById("navLinks");
 
-function showJob(
-    title, employer, location, category,
-    type, salary, description
-) {
-
-    document.getElementById("jobTitle").textContent = title;
-    document.getElementById("jobEmployer").textContent = employer;
-    document.getElementById("jobLocation").textContent = location;
-    document.getElementById("jobCategory").textContent = category;
-    document.getElementById("jobType").textContent = type;
-    document.getElementById("jobSalary").textContent = salary;
-    document.getElementById("jobDescription").textContent = description;
-    document.getElementById("applicationMessage").textContent = "";
-
-    document.getElementById("jobModal").style.display = "block";
-}
-
-/* =====================================
-   EMPLOYER FORM
-===================================== */
-
-function showEmployer() {
-
-    document.getElementById("employerMessage").textContent = "";
-    document.getElementById("employerModal").style.display = "block";
-}
-
-/* =====================================
-   CLOSE MODALS
-===================================== */
-
-function closeModal(id) {
-    document.getElementById(id).style.display = "none";
-}
-
-/* =====================================
-   SEARCH JOBS
-===================================== */
-
-function searchJobs() {
-
-    const keyword = document
-        .getElementById("keyword")
-        .value.toLowerCase().trim();
-
-    const location = document
-        .getElementById("location")
-        .value.toLowerCase().trim();
-
-    const jobs = document.querySelectorAll(".job");
-    let count = 0;
-
-    jobs.forEach(job => {
-
-        const title = job.dataset.title.toLowerCase();
-        const place = job.dataset.location.toLowerCase();
-
-        const match =
-            (!keyword || title.includes(keyword)) &&
-            (!location || place.includes(location));
-
-        job.style.display = match ? "block" : "none";
-
-        if (match) count++;
-    });
-
-    document.getElementById("noResults").style.display =
-        count ? "none" : "block";
-}
-
-/* =====================================
-   APPLICATION PREVIEW
-===================================== */
-
-function previewApplication(event) {
-
-    event.preventDefault();
-
-    document.getElementById("applicationMessage").textContent =
-        "Preview only: your application has NOT been sent or saved. " +
-        "The real application system will be connected in a later stage.";
-}
-
-/* =====================================
-   EMPLOYER REQUEST PREVIEW
-===================================== */
-
-function previewEmployer(event) {
-
-    event.preventDefault();
-
-    document.getElementById("employerMessage").textContent =
-        "Preview only: your employer request has NOT been sent or saved. " +
-        "Employer registration will be connected in a later stage.";
-}
-
-/* =====================================
-   CLOSE MODAL ON BACKGROUND CLICK
-===================================== */
-
-window.onclick = function(event) {
-
-    if (event.target.classList.contains("modal")) {
-        event.target.style.display = "none";
-    }
-};
-
-/* =====================================
-   START WEBSITE
-===================================== */
-
-document.addEventListener("DOMContentLoaded", function() {
-    initializeSupabase();
+menuToggle.addEventListener("click", function () {
+  const isOpen = navLinks.classList.toggle("show");
+  menuToggle.setAttribute("aria-expanded", String(isOpen));
 });
 
+navLinks.querySelectorAll("a").forEach(function (link) {
+  link.addEventListener("click", function () {
+    navLinks.classList.remove("show");
+    menuToggle.setAttribute("aria-expanded", "false");
+  });
+});
+
+/* MODALS */
+function openModal(id) {
+  const modal = document.getElementById(id);
+  if (modal) {
+    modal.classList.add("open");
+  }
+}
+
+function closeModal(modal) {
+  modal.classList.remove("open");
+}
+
+document.querySelectorAll("[data-close]").forEach(function (button) {
+  button.addEventListener("click", function () {
+    const modal = button.closest(".modal-backdrop");
+    if (modal) {
+      closeModal(modal);
+    }
+  });
+});
+
+document.querySelectorAll(".modal-backdrop").forEach(function (backdrop) {
+  backdrop.addEventListener("click", function (event) {
+    if (event.target === backdrop) {
+      closeModal(backdrop);
+    }
+  });
+});
+
+document.addEventListener("keydown", function (event) {
+  if (event.key === "Escape") {
+    document.querySelectorAll(".modal-backdrop.open").forEach(closeModal);
+  }
+});
+
+/* JOB DETAILS */
+document.querySelectorAll(".view-job").forEach(function (button) {
+  button.addEventListener("click", function () {
+    const card = button.closest(".job-card");
+
+    document.getElementById("jobModalTitle").textContent =
+      card.dataset.title || "Opportunity";
+
+    document.getElementById("jobModalCompany").textContent =
+      card.querySelector(".company").textContent;
+
+    document.getElementById("jobModalDescription").textContent =
+      card.dataset.description || "";
+
+    openModal("jobModal");
+  });
+});
+
+document.getElementById("previewApply").addEventListener("click", function () {
+  closeModal(document.getElementById("jobModal"));
+
+  document.getElementById("infoTitle").textContent = "Application preview";
+
+  document.getElementById("infoText").textContent =
+    "The candidate application feature is not connected yet. No application has been submitted or saved.";
+
+  openModal("infoModal");
+});
+
+/* EMPLOYER PREVIEW */
+function openEmployerPreview() {
+  openModal("employerModal");
+}
+
+document.getElementById("employerNav").addEventListener("click", openEmployerPreview);
+document.getElementById("employerCta").addEventListener("click", openEmployerPreview);
+
+document.getElementById("footerPost").addEventListener("click", function (event) {
+  event.preventDefault();
+  openEmployerPreview();
+});
+
+document.getElementById("employerForm").addEventListener("submit", function (event) {
+  event.preventDefault();
+
+  document.getElementById("employerStatus").textContent =
+    "Preview complete. Nothing was sent or stored.";
+
+  this.reset();
+});
+
+/* JOB SEARCH AND FILTERS */
+function filterJobs() {
+  const keyword = document.getElementById("keyword").value.trim().toLowerCase();
+  const location = document.getElementById("location").value.trim().toLowerCase();
+  const category = document.getElementById("sortFilter").value;
+
+  let visible = 0;
+
+  document.querySelectorAll(".job-card").forEach(function (card) {
+    const searchableText =
+      (card.dataset.title + " " + card.dataset.category).toLowerCase();
+
+    const matchesKeyword =
+      !keyword || searchableText.includes(keyword);
+
+    const matchesLocation =
+      !location || card.dataset.location.toLowerCase().includes(location);
+
+    const matchesCategory =
+      category === "all" || card.dataset.category === category;
+
+    const show = matchesKeyword && matchesLocation && matchesCategory;
+
+    card.style.display = show ? "flex" : "none";
+
+    if (show) {
+      visible += 1;
+    }
+  });
+
+  let empty = document.getElementById("noJobsMessage");
+
+  if (!empty) {
+    empty = document.createElement("p");
+    empty.id = "noJobsMessage";
+    empty.className = "demo-note";
+    empty.textContent = "No demonstration listings match your search.";
+    document.getElementById("jobGrid").after(empty);
+  }
+
+  empty.style.display = visible ? "none" : "block";
+}
+
+document.getElementById("searchForm").addEventListener("submit", function (event) {
+  event.preventDefault();
+  document.getElementById("sortFilter").value = "all";
+  filterJobs();
+  document.getElementById("jobs").scrollIntoView({ behavior:"smooth" });
+});
+
+document.getElementById("sortFilter").addEventListener("change", filterJobs);
+
+document.querySelectorAll(".category").forEach(function (button) {
+  button.addEventListener("click", function () {
+    document.querySelectorAll(".category").forEach(function (item) {
+      item.classList.remove("active");
+    });
+
+    button.classList.add("active");
+    document.getElementById("sortFilter").value = button.dataset.category;
+    document.getElementById("keyword").value = "";
+    document.getElementById("location").value = "";
+
+    filterJobs();
+    document.getElementById("jobs").scrollIntoView({ behavior:"smooth" });
+  });
+});
+
+/* DATABASE TEST */
+document.getElementById("testDatabase").addEventListener("click", testDatabaseConnection);
+
+/* FOOTER YEAR */
+document.getElementById("year").textContent = String(new Date().getFullYear());
+
+/* START */
+initializeSupabase();
 </script>
 
 </body>
