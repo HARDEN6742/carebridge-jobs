@@ -529,6 +529,15 @@ footer { background:#0e2033;color:#d6e2ec;padding:55px 0 22px; }
 }
 .status { font-size:12px;color:#a9bac8;margin-top:8px;min-height:18px; }
 
+.account-tabs { display:flex;gap:8px;margin:18px 0 12px; }
+.account-tab { flex:1;border:1px solid var(--line);border-radius:9px;background:#f7fafc;padding:10px;color:var(--muted);font-weight:700;cursor:pointer; }
+.account-tab.active { background:#e8f4fa;border-color:#8bbbd8;color:var(--blue); }
+.account-panel { border:1px solid var(--line);border-radius:12px;padding:17px;margin-top:16px; }
+.account-panel h3 { margin:0 0 5px;color:var(--navy);font:800 17px Manrope; }
+.account-panel p { margin:5px 0;color:var(--muted); }
+.account-panel .btn { margin-top:12px; }
+
+
 @media(max-width:900px) {
   .hero-grid { grid-template-columns:1fr .7fr;gap:15px; }
   .categories { grid-template-columns:repeat(3,1fr); }
@@ -915,42 +924,53 @@ footer { background:#0e2033;color:#d6e2ec;padding:55px 0 22px; }
   </div>
 </div>
 
-<!-- EMPLOYER MODAL -->
+<!-- EMPLOYER ACCOUNT MODAL -->
 <div class="modal-backdrop" id="employerModal" role="dialog" aria-modal="true" aria-labelledby="employerModalTitle">
   <div class="modal">
     <button class="modal-close" data-close aria-label="Close">×</button>
-    <h2 id="employerModalTitle">Employer interest</h2>
-    <p>This preview shows the intended employer enquiry flow. It does not submit or store information.</p>
+    <h2 id="employerModalTitle">Employer account</h2>
+    <p id="employerIntro">Create an employer account to register your healthcare organisation. Job publishing will require separate verification.</p>
+
+    <div class="account-tabs" role="group" aria-label="Employer account options">
+      <button type="button" class="account-tab active" id="employerRegisterTab">Create account</button>
+      <button type="button" class="account-tab" id="employerLoginTab">Log in</button>
+    </div>
 
     <form id="employerForm">
-      <div class="form-grid">
+      <div id="employerProfileFields">
         <div class="form-group">
-          <label for="employerName">Your name</label>
-          <input id="employerName" required placeholder="Full name">
+          <label for="employerName">Contact name</label>
+          <input id="employerName" autocomplete="name" required placeholder="Your full name">
         </div>
-
         <div class="form-group">
-          <label for="employerEmail">Work email</label>
-          <input id="employerEmail" type="email" required placeholder="name@company.com">
-        </div>
-
-        <div class="form-group full">
-          <label for="companyName">Organisation</label>
-          <input id="companyName" required placeholder="Healthcare organisation">
-        </div>
-
-        <div class="form-group full">
-          <label for="employerMessage">What would you like to do?</label>
-          <textarea id="employerMessage" placeholder="Tell us about your recruitment needs"></textarea>
+          <label for="companyName">Organisation name</label>
+          <input id="companyName" autocomplete="organization" required placeholder="Healthcare organisation">
         </div>
       </div>
 
-      <div class="notice">
-        Preview only. Do not enter confidential or sensitive information.
+      <div class="form-group">
+        <label for="employerEmail">Email address</label>
+        <input id="employerEmail" type="email" autocomplete="email" required placeholder="name@organisation.com">
       </div>
-      <button class="btn btn-primary" type="submit">Preview enquiry</button>
-      <div class="status" id="employerStatus"></div>
+      <div class="form-group">
+        <label for="employerPassword">Password</label>
+        <input id="employerPassword" type="password" autocomplete="new-password" minlength="8" required placeholder="At least 8 characters">
+      </div>
+
+      <button class="btn btn-primary" id="employerSubmit" type="submit">Create employer account</button>
+      <div class="status" id="employerStatus" role="status" aria-live="polite"></div>
     </form>
+
+    <div class="account-panel" id="employerAccountPanel" hidden>
+      <h3 id="employerAccountName">Your organisation</h3>
+      <p id="employerAccountEmail"></p>
+      <p id="employerAccountState">Your employer profile is connected.</p>
+      <button class="btn btn-outline" type="button" id="employerSignOut">Log out</button>
+    </div>
+
+    <div class="notice">
+      Employer accounts do not automatically receive permission to publish jobs. Organisation and vacancy verification will be added before job publishing is enabled.
+    </div>
   </div>
 </div>
 
@@ -1114,10 +1134,103 @@ document.getElementById("previewApply").addEventListener("click", function () {
   openModal("infoModal");
 });
 
-/* EMPLOYER PREVIEW */
-function openEmployerPreview() {
-  openModal("employerModal");
+/* EMPLOYER AUTHENTICATION AND ORGANISATION PROFILE */
+let employerMode = "register";
+
+function setEmployerMode(mode) {
+  employerMode = mode;
+  const isRegister = mode === "register";
+  document.getElementById("employerRegisterTab").classList.toggle("active", isRegister);
+  document.getElementById("employerLoginTab").classList.toggle("active", !isRegister);
+  document.getElementById("employerProfileFields").hidden = !isRegister;
+  document.getElementById("employerName").required = isRegister;
+  document.getElementById("companyName").required = isRegister;
+  document.getElementById("employerPassword").autocomplete = isRegister ? "new-password" : "current-password";
+  document.getElementById("employerSubmit").textContent = isRegister ? "Create employer account" : "Log in";
+  document.getElementById("employerIntro").textContent = isRegister
+    ? "Create an employer account to register your healthcare organisation. Job publishing will require separate verification."
+    : "Log in to access your registered employer organisation.";
+  document.getElementById("employerStatus").textContent = "";
 }
+
+async function loadEmployerAccount() {
+  if (!supabaseClient) return;
+  const { data, error } = await supabaseClient.auth.getUser();
+  if (error || !data.user) {
+    document.getElementById("employerForm").hidden = false;
+    document.getElementById("employerAccountPanel").hidden = true;
+    return;
+  }
+
+  const user = data.user;
+  const { data: profile, error: profileError } = await supabaseClient
+    .from("employer_profiles")
+    .select("id, organization_name, contact_name")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (profileError) {
+    document.getElementById("employerStatus").textContent =
+      "You are signed in, but your organisation profile could not be loaded: " + profileError.message;
+    return;
+  }
+
+  if (!profile) {
+    const metadata = user.user_metadata || {};
+    const organizationName = String(metadata.organization_name || "").trim();
+    const contactName = String(metadata.contact_name || "").trim();
+
+    if (!organizationName) {
+      document.getElementById("employerStatus").textContent =
+        "Your account is signed in, but no organisation profile exists yet. Please contact support before continuing.";
+      return;
+    }
+
+    const { error: insertError } = await supabaseClient
+      .from("employer_profiles")
+      .insert({
+        user_id: user.id,
+        organization_name: organizationName,
+        contact_name: contactName || null
+      });
+
+    if (insertError) {
+      document.getElementById("employerStatus").textContent =
+        "Your account is active, but the organisation profile could not be created: " + insertError.message;
+      return;
+    }
+
+    return loadEmployerAccount();
+  }
+
+  document.getElementById("employerForm").hidden = true;
+  document.getElementById("employerAccountPanel").hidden = false;
+  document.getElementById("employerAccountName").textContent = profile.organization_name;
+  document.getElementById("employerAccountEmail").textContent = user.email || "";
+  document.getElementById("employerAccountState").textContent =
+    "Your organisation profile is connected. Job publishing is not enabled until verification is implemented.";
+}
+
+async function openEmployerPreview() {
+  document.getElementById("employerForm").hidden = false;
+  document.getElementById("employerAccountPanel").hidden = true;
+  document.getElementById("employerStatus").textContent = "";
+  setEmployerMode("register");
+  openModal("employerModal");
+  await loadEmployerAccount();
+}
+
+document.getElementById("employerRegisterTab").addEventListener("click", function () {
+  setEmployerMode("register");
+  document.getElementById("employerForm").hidden = false;
+  document.getElementById("employerAccountPanel").hidden = true;
+});
+
+document.getElementById("employerLoginTab").addEventListener("click", function () {
+  setEmployerMode("login");
+  document.getElementById("employerForm").hidden = false;
+  document.getElementById("employerAccountPanel").hidden = true;
+});
 
 document.getElementById("employerNav").addEventListener("click", openEmployerPreview);
 document.getElementById("employerCta").addEventListener("click", openEmployerPreview);
@@ -1127,14 +1240,75 @@ document.getElementById("footerPost").addEventListener("click", function (event)
   openEmployerPreview();
 });
 
-document.getElementById("employerForm").addEventListener("submit", function (event) {
+document.getElementById("employerForm").addEventListener("submit", async function (event) {
   event.preventDefault();
+  if (!supabaseClient) {
+    document.getElementById("employerStatus").textContent =
+      "Authentication is unavailable because Supabase did not initialize. Refresh and try again.";
+    return;
+  }
 
-  document.getElementById("employerStatus").textContent =
-    "Preview complete. Nothing was sent or stored.";
+  const email = document.getElementById("employerEmail").value.trim();
+  const password = document.getElementById("employerPassword").value;
+  const submit = document.getElementById("employerSubmit");
+  const status = document.getElementById("employerStatus");
 
-  this.reset();
+  submit.disabled = true;
+  status.textContent = employerMode === "register" ? "Creating your account…" : "Signing you in…";
+
+  try {
+    if (employerMode === "register") {
+      const contactName = document.getElementById("employerName").value.trim();
+      const organizationName = document.getElementById("companyName").value.trim();
+
+      const { data, error } = await supabaseClient.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: {
+            organization_name: organizationName,
+            contact_name: contactName
+          }
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.session && data.user) {
+        await loadEmployerAccount();
+        status.textContent = "Account created and signed in. Your organisation profile is being connected.";
+      } else {
+        status.textContent =
+          "Registration received. Check your email and confirm your address. Then return here and log in to finish connecting your organisation profile.";
+      }
+    } else {
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      await loadEmployerAccount();
+    }
+  } catch (error) {
+    status.textContent = error.message || "The request could not be completed. Please try again.";
+  } finally {
+    submit.disabled = false;
+  }
 });
+
+document.getElementById("employerSignOut").addEventListener("click", async function () {
+  if (!supabaseClient) return;
+  const { error } = await supabaseClient.auth.signOut();
+  if (error) {
+    document.getElementById("employerAccountState").textContent = error.message;
+    return;
+  }
+  document.getElementById("employerAccountPanel").hidden = true;
+  document.getElementById("employerForm").hidden = false;
+  document.getElementById("employerForm").reset();
+  setEmployerMode("register");
+  document.getElementById("employerStatus").textContent = "You have been logged out.";
+});
+
+
 
 /* JOB SEARCH AND FILTERS */
 function filterJobs() {
