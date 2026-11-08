@@ -1,222 +1,229 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Discover healthcare careers and connect with hospitals and medical employers around the world.">
-  <title>CareBridge Jobs | Healthcare Careers Worldwide</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: Arial, sans-serif;
-      color: #172b43;
-      background: #f6f9fc;
-      line-height: 1.6;
-    }
-    header {
-      background: white;
-      padding: 18px 7%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 12px #142b4310;
-    }
-    .logo { font-size: 24px; font-weight: bold; color: #087eaa; }
-    nav a {
-      color: #34465a;
-      text-decoration: none;
-      margin-left: 22px;
-      font-size: 14px;
-    }
-    .hero {
-      background: linear-gradient(120deg,#063b60,#087eaa);
-      color: white;
-      padding: 85px 8%;
-      text-align: center;
-    }
-    .hero h1 { font-size: clamp(34px,5vw,55px); line-height: 1.15; }
-    .hero p { margin: 18px auto 28px; max-width: 620px; color: #e2f4ff; }
-    .search {
-      background: white;
-      max-width: 750px;
-      margin: auto;
-      padding: 10px;
-      border-radius: 10px;
-      display: flex;
-      gap: 10px;
-    }
-    input, select {
-      padding: 14px;
-      border: 1px solid #dce5ec;
-      border-radius: 6px;
-      min-width: 0;
-      flex: 1;
-      font-size: 14px;
-    }
-    button {
-      background: #08a2b9;
-      color: white;
-      border: 0;
-      border-radius: 6px;
-      padding: 13px 22px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    .section { padding: 55px 8%; }
-    .section h2 { font-size: 28px; margin-bottom: 8px; }
-    .muted { color: #708095; margin-bottom: 25px; }
-    .categories {
-      display: grid;
-      grid-template-columns: repeat(auto-fit,minmax(150px,1fr));
-      gap: 15px;
-    }
-    .category, .job {
-      background: white;
-      padding: 22px;
-      border: 1px solid #e6edf3;
-      border-radius: 10px;
-    }
-    .category { text-align: center; font-weight: bold; }
-    .category span { display: block; font-size: 28px; margin-bottom: 8px; }
-    .jobs {
-      display: grid;
-      grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
-      gap: 18px;
-    }
-    .job h3 { margin-bottom: 8px; color: #075b81; }
-    .job p { color: #708095; font-size: 14px; margin-bottom: 12px; }
-    .tag {
-      display: inline-block;
-      background: #e7f5f9;
-      color: #087eaa;
-      padding: 5px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-      margin-bottom: 12px;
-    }
-    .job button { display: block; margin-top: 12px; }
-    .employer {
-      background: #e7f5f9;
-      padding: 45px 8%;
-      text-align: center;
-    }
-    .employer p { margin: 12px auto 20px; max-width: 550px; }
-    footer {
-      background: #092c43;
-      color: white;
-      padding: 35px 8%;
-      text-align: center;
-    }
-    footer p { color: #c3d6e2; font-size: 13px; margin-top: 8px; }
-    @media(max-width:650px) {
-      header { flex-direction: column; gap: 12px; }
-      nav a { margin: 0 7px; }
-      .search { flex-direction: column; }
-      .hero { padding: 65px 6%; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CareBridge Jobs | Healthcare Careers Worldwide</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f5f8fc;color:#172b4d;line-height:1.6}
+header{background:#fff;padding:18px 7%;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 12px #0000000b}
+.logo{font-size:25px;font-weight:800;color:#087e8b}
+nav a{margin-left:22px;text-decoration:none;color:#33445e;font-weight:600}
+.hero{padding:75px 7%;background:linear-gradient(120deg,#073b4c,#087e8b);color:white;text-align:center}
+.hero h1{font-size:clamp(32px,5vw,52px);margin-bottom:15px}
+.hero p{font-size:18px;margin-bottom:28px;color:#e4f7f8}
+.search{display:flex;gap:10px;max-width:750px;margin:auto;flex-wrap:wrap}
+.search input{flex:1;min-width:180px;padding:16px;border:0;border-radius:7px;font-size:15px}
+button{background:#f4a261;color:#172b4d;border:0;padding:14px 22px;border-radius:7px;font-weight:bold;cursor:pointer}
+button:hover{opacity:.9}
+section{padding:55px 7%}
+.section-title{text-align:center;margin-bottom:30px}
+.section-title h2{font-size:30px;margin-bottom:8px}
+.categories{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:15px}
+.category{background:white;padding:22px 12px;text-align:center;border-radius:10px;box-shadow:0 3px 14px #00000008;font-weight:bold}
+.jobs{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.job{background:white;padding:24px;border-radius:12px;box-shadow:0 4px 18px #0000000b}
+.job h3{margin:12px 0 5px}
+.job p{color:#63738a;margin:5px 0}
+.tag{display:inline-block;background:#e3f5f5;color:#087e8b;padding:5px 10px;border-radius:20px;font-size:12px;font-weight:bold}
+.job button{margin-top:16px;width:100%}
+.notice{font-size:13px;color:#8a5b16;background:#fff4dc;padding:12px;border-radius:7px;margin-top:20px;text-align:center}
+.employer{background:#e7f5f6;text-align:center}
+.employer p{margin:10px auto 20px;max-width:650px}
+footer{background:#102f40;color:white;padding:30px 7%;text-align:center}
+footer p{color:#c4d5df;font-size:14px}
+.modal{display:none;position:fixed;inset:0;background:#0009;z-index:10;padding:20px;overflow:auto}
+.modal-content{background:white;max-width:600px;margin:35px auto;padding:28px;border-radius:12px;position:relative}
+.close{position:absolute;right:18px;top:12px;background:#edf2f7;padding:7px 12px}
+.modal-content h2{margin:12px 0}
+.modal-content p{margin:8px 0;color:#53657a}
+form label{display:block;margin-top:14px;font-weight:bold}
+form input,form textarea{width:100%;padding:12px;margin-top:6px;border:1px solid #ccd5df;border-radius:6px;font:inherit}
+form button{margin-top:18px;width:100%}
+@media(max-width:650px){header{flex-direction:column;gap:12px}nav a{margin:0 7px;font-size:13px}.hero{padding:55px 5%}section{padding:40px 5%}}
+</style>
 </head>
 <body>
+
 <header>
-  <div class="logo">✚ CareBridge Jobs</div>
-  <nav>
-    <a href="#jobs">Find Jobs</a>
-    <a href="#categories">Categories</a>
-    <a href="#employers">Employers</a>
-  </nav>
+<div class="logo">CareBridge Jobs</div>
+<nav>
+<a href="#home">Home</a>
+<a href="#categories">Categories</a>
+<a href="#jobs">Find Jobs</a>
+<a href="#employers">Employers</a>
+</nav>
 </header>
 
-<section class="hero">
-  <h1>Your Healthcare Career<br>Starts Here</h1>
-  <p>Discover healthcare opportunities and connect with medical employers around the world.</p>
-  <div class="search">
-    <input id="keyword" placeholder="Job title or profession">
-    <input id="location" placeholder="City or country">
-    <button onclick="searchJobs()">Search Jobs</button>
-  </div>
+<div class="hero" id="home">
+<h1>Your Healthcare Career Starts Here</h1>
+<p>Discover healthcare career opportunities and connect with employers around the world.</p>
+<div class="search">
+<input id="keyword" type="text" placeholder="Job title or profession">
+<input id="location" type="text" placeholder="Country or city">
+<button onclick="searchJobs()">Search Jobs</button>
+</div>
+</div>
+
+<section id="categories">
+<div class="section-title">
+<h2>Explore Healthcare Careers</h2>
+<p>Find opportunities across different healthcare professions.</p>
+</div>
+<div class="categories">
+<div class="category">🩺<br>Doctors</div>
+<div class="category">🏥<br>Nursing</div>
+<div class="category">🔬<br>Laboratory</div>
+<div class="category">💊<br>Pharmacy</div>
+<div class="category">🦷<br>Dentistry</div>
+<div class="category">📋<br>Administration</div>
+</div>
 </section>
 
-<section class="section" id="categories">
-  <h2>Explore Career Categories</h2>
-  <p class="muted">Find opportunities in your professional field.</p>
-  <div class="categories">
-    <div class="category"><span>🩺</span>Doctors</div>
-    <div class="category"><span>💉</span>Nursing</div>
-    <div class="category"><span>🔬</span>Laboratory</div>
-    <div class="category"><span>💊</span>Pharmacy</div>
-    <div class="category"><span>🦷</span>Dentistry</div>
-    <div class="category"><span>🏥</span>Administration</div>
-  </div>
-</section>
+<section id="jobs">
+<div class="section-title">
+<h2>Featured Opportunities</h2>
+<p>Explore example listings. These are demonstration jobs, not verified vacancies.</p>
+</div>
 
-<section class="section" id="jobs">
-  <h2>Featured Opportunities</h2>
-  <p class="muted">Explore example listings. These are demonstration jobs, not verified vacancies.</p>
-  <div class="jobs" id="jobList">
-    <article class="job" data-title="Registered Nurse" data-location="London, UK">
-      <span class="tag">Nursing</span>
-      <h3>Registered Nurse</h3>
-      <p>Example Hospital · London, UK</p>
-      <p>Full-time · Competitive salary</p>
-      <button onclick="apply('Registered Nurse')">View opportunity</button>
-    </article>
-    <article class="job" data-title="Medical Laboratory Technologist" data-location="Toronto, Canada">
-      <span class="tag">Laboratory</span>
-      <h3>Medical Laboratory Technologist</h3>
-      <p>Example Medical Centre · Toronto, Canada</p>
-      <p>Full-time · Competitive salary</p>
-      <button onclick="apply('Medical Laboratory Technologist')">View opportunity</button>
-    </article>
-    <article class="job" data-title="General Practitioner" data-location="Nairobi, Kenya">
-      <span class="tag">Doctors</span>
-      <h3>General Practitioner</h3>
-      <p>Example Health Centre · Nairobi, Kenya</p>
-      <p>Full-time · Competitive salary</p>
-      <button onclick="apply('General Practitioner')">View opportunity</button>
-    </article>
-  </div>
-  <p id="noResults" hidden>No matching demonstration listings found.</p>
+<div class="jobs" id="jobList">
+
+<div class="job" data-title="Registered Nurse" data-location="London UK">
+<span class="tag">Nursing</span>
+<h3>Registered Nurse</h3>
+<p>Example Hospital · London, UK</p>
+<p>Full-time · Competitive salary</p>
+<button onclick="showJob('Registered Nurse','Example Hospital','London, UK','Nursing','Full-time','Competitive salary','Provide professional patient care, support clinical teams and maintain high standards of nursing practice.')">View opportunity</button>
+</div>
+
+<div class="job" data-title="Medical Laboratory Technologist" data-location="Toronto Canada">
+<span class="tag">Laboratory</span>
+<h3>Medical Laboratory Technologist</h3>
+<p>Example Medical Centre · Toronto, Canada</p>
+<p>Full-time · Competitive salary</p>
+<button onclick="showJob('Medical Laboratory Technologist','Example Medical Centre','Toronto, Canada','Laboratory','Full-time','Competitive salary','Perform laboratory investigations, maintain equipment and support accurate diagnostic testing.')">View opportunity</button>
+</div>
+
+<div class="job" data-title="General Practitioner" data-location="Nairobi Kenya">
+<span class="tag">Doctors</span>
+<h3>General Practitioner</h3>
+<p>Example Health Centre · Nairobi, Kenya</p>
+<p>Full-time · Competitive salary</p>
+<button onclick="showJob('General Practitioner','Example Health Centre','Nairobi, Kenya','Doctors','Full-time','Competitive salary','Provide primary healthcare consultations, assess patients and coordinate appropriate treatment.')">View opportunity</button>
+</div>
+
+</div>
+<div class="notice">Demonstration listings only. These are not verified vacancies and are not accepting real applications.</div>
+<p id="noResults" style="display:none;text-align:center;margin-top:20px">No matching demonstration opportunities found.</p>
 </section>
 
 <section class="employer" id="employers">
-  <h2>Are You a Healthcare Employer?</h2>
-  <p>Connect with qualified healthcare professionals and grow your recruitment reach.</p>
-  <button onclick="contactEmployer()">Contact our team</button>
+<div class="section-title">
+<h2>Are You a Healthcare Employer?</h2>
+<p>CareBridge Jobs aims to help healthcare organisations connect with qualified professionals.</p>
+<button onclick="showEmployer()">Register Employer Interest</button>
+</div>
 </section>
 
 <footer>
-  <strong>CareBridge Jobs</strong>
-  <p>Connecting healthcare talent with opportunities worldwide.</p>
-  <p>© 2026 CareBridge Jobs. All rights reserved.</p>
+<h3>CareBridge Jobs</h3>
+<p>Connecting healthcare talent with opportunities worldwide.</p>
+<p>© 2026 CareBridge Jobs. All rights reserved.</p>
 </footer>
 
+<div class="modal" id="jobModal">
+<div class="modal-content">
+<button class="close" onclick="closeModal('jobModal')">✕</button>
+<span class="tag" id="jobCategory"></span>
+<h2 id="jobTitle"></h2>
+<p id="jobEmployer"></p>
+<p id="jobLocation"></p>
+<p id="jobType"></p>
+<p id="jobSalary"></p>
+<h3 style="margin-top:20px">About this opportunity</h3>
+<p id="jobDescription"></p>
+<div class="notice">This is a demonstration listing, not a verified vacancy.</div>
+<h3 style="margin-top:20px">Application form preview</h3>
+<form onsubmit="previewApplication(event)">
+<label>Full name</label>
+<input required placeholder="Enter your full name">
+<label>Email address</label>
+<input type="email" required placeholder="Enter your email">
+<label>Phone number</label>
+<input required placeholder="Enter your phone number">
+<label>Short introduction</label>
+<textarea required rows="4" placeholder="Tell us about your experience"></textarea>
+<button type="submit">Preview Application</button>
+</form>
+<p id="applicationMessage" style="margin-top:12px"></p>
+</div>
+</div>
+
+<div class="modal" id="employerModal">
+<div class="modal-content">
+<button class="close" onclick="closeModal('employerModal')">✕</button>
+<h2>Employer Interest Form</h2>
+<p>This is a demonstration form. It does not send or save information.</p>
+<form onsubmit="previewEmployer(event)">
+<label>Organisation name</label>
+<input required placeholder="Hospital or organisation name">
+<label>Contact person's name</label>
+<input required placeholder="Your full name">
+<label>Work email</label>
+<input type="email" required placeholder="Your work email">
+<label>What kind of staff are you looking for?</label>
+<textarea required rows="4" placeholder="Describe your recruitment needs"></textarea>
+<button type="submit">Preview Employer Request</button>
+</form>
+<p id="employerMessage"></p>
+</div>
+</div>
+
 <script>
-  function searchJobs() {
-    const keyword = document.getElementById('keyword').value.toLowerCase();
-    const location = document.getElementById('location').value.toLowerCase();
-    const jobs = document.querySelectorAll('.job');
-    let count = 0;
-
-    jobs.forEach(job => {
-      const matches =
-        job.dataset.title.toLowerCase().includes(keyword) &&
-        job.dataset.location.toLowerCase().includes(location);
-      job.style.display = matches ? 'block' : 'none';
-      if (matches) count++;
-    });
-
-    document.getElementById('noResults').hidden = count !== 0;
-  }
-
-  function apply(title) {
-    alert('Thank you for your interest in ' + title +
-      '. Application services are coming soon.');
-  }
-
-  function contactEmployer() {
-    alert('Employer registration is coming soon. Please check back later.');
-  }
+function showJob(title,employer,location,category,type,salary,description){
+document.getElementById('jobTitle').textContent=title;
+document.getElementById('jobEmployer').textContent=employer;
+document.getElementById('jobLocation').textContent=location;
+document.getElementById('jobCategory').textContent=category;
+document.getElementById('jobType').textContent=type;
+document.getElementById('jobSalary').textContent=salary;
+document.getElementById('jobDescription').textContent=description;
+document.getElementById('applicationMessage').textContent='';
+document.getElementById('jobModal').style.display='block';
+}
+function showEmployer(){
+document.getElementById('employerMessage').textContent='';
+document.getElementById('employerModal').style.display='block';
+}
+function closeModal(id){
+document.getElementById(id).style.display='none';
+}
+function searchJobs(){
+let keyword=document.getElementById('keyword').value.toLowerCase().trim();
+let location=document.getElementById('location').value.toLowerCase().trim();
+let jobs=document.querySelectorAll('.job');
+let count=0;
+jobs.forEach(job=>{
+let title=job.dataset.title.toLowerCase();
+let place=job.dataset.location.toLowerCase();
+let match=(!keyword||title.includes(keyword))&&(!location||place.includes(location));
+job.style.display=match?'block':'none';
+if(match)count++;
+});
+document.getElementById('noResults').style.display=count?'none':'block';
+}
+function previewApplication(event){
+event.preventDefault();
+document.getElementById('applicationMessage').textContent='Preview only: your application has NOT been sent or saved. The real application system will be connected in a later stage.';
+}
+function previewEmployer(event){
+event.preventDefault();
+document.getElementById('employerMessage').textContent='Preview only: your employer request has NOT been sent or saved. Employer registration will be connected in a later stage.';
+}
+window.onclick=function(event){
+if(event.target.classList.contains('modal'))event.target.style.display='none';
+};
 </script>
 </body>
 </html>
