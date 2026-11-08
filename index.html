@@ -21,7 +21,7 @@ body {
 }
 
 header {
-    background: #fff;
+    background: white;
     padding: 18px 7%;
     display: flex;
     justify-content: space-between;
@@ -195,7 +195,7 @@ footer p {
     max-width: 500px;
     border-radius: 7px;
     background: #1b4050;
-    color: #fff;
+    color: white;
     font-size: 13px;
 }
 
@@ -297,24 +297,17 @@ form button {
 
 <div class="hero" id="home">
     <h1>Your Healthcare Career Starts Here</h1>
-
     <p>
         Discover healthcare career opportunities and connect
         with employers around the world.
     </p>
 
     <div class="search">
-        <input
-            id="keyword"
-            type="text"
-            placeholder="Job title or profession"
-        >
+        <input id="keyword" type="text"
+               placeholder="Job title or profession">
 
-        <input
-            id="location"
-            type="text"
-            placeholder="Country or city"
-        >
+        <input id="location" type="text"
+               placeholder="Country or city">
 
         <button onclick="searchJobs()">Search Jobs</button>
     </div>
@@ -364,9 +357,7 @@ form button {
                 'Full-time',
                 'Competitive salary',
                 'Provide professional patient care, support clinical teams and maintain high standards of nursing practice.'
-            )">
-                View opportunity
-            </button>
+            )">View opportunity</button>
         </div>
 
         <div class="job"
@@ -386,9 +377,7 @@ form button {
                 'Full-time',
                 'Competitive salary',
                 'Perform laboratory investigations, maintain equipment and support accurate diagnostic testing.'
-            )">
-                View opportunity
-            </button>
+            )">View opportunity</button>
         </div>
 
         <div class="job"
@@ -408,9 +397,7 @@ form button {
                 'Full-time',
                 'Competitive salary',
                 'Provide primary healthcare consultations, assess patients and coordinate appropriate treatment.'
-            )">
-                View opportunity
-            </button>
+            )">View opportunity</button>
         </div>
 
     </div>
@@ -429,12 +416,10 @@ form button {
 <section class="employer" id="employers">
     <div class="section-title">
         <h2>Are You a Healthcare Employer?</h2>
-
         <p>
             CareBridge Jobs aims to help healthcare organisations
             connect with qualified professionals.
         </p>
-
         <button onclick="showEmployer()">
             Register Employer Interest
         </button>
@@ -443,18 +428,14 @@ form button {
 
 <footer>
     <h3>CareBridge Jobs</h3>
-
     <p>
         Connecting healthcare talent with opportunities worldwide.
     </p>
-
     <p>© 2026 CareBridge Jobs. All rights reserved.</p>
 
     <div class="database-status">
         <strong>Database connection:</strong>
-        <p id="databaseStatus">
-            Checking configuration...
-        </p>
+        <p id="databaseStatus">Checking configuration...</p>
 
         <button onclick="testDatabaseConnection()">
             Test Database Connection
@@ -462,24 +443,19 @@ form button {
     </div>
 </footer>
 
-<!-- JOB DETAILS MODAL -->
 <div class="modal" id="jobModal">
     <div class="modal-content">
-
         <button class="close"
                 onclick="closeModal('jobModal')">✕</button>
 
         <span class="tag" id="jobCategory"></span>
-
         <h2 id="jobTitle"></h2>
-
         <p id="jobEmployer"></p>
         <p id="jobLocation"></p>
         <p id="jobType"></p>
         <p id="jobSalary"></p>
 
         <h3 style="margin-top:20px">About this opportunity</h3>
-
         <p id="jobDescription"></p>
 
         <div class="notice">
@@ -489,7 +465,6 @@ form button {
         <h3 style="margin-top:20px">Application form preview</h3>
 
         <form onsubmit="previewApplication(event)">
-
             <label>Full name</label>
             <input required placeholder="Enter your full name">
 
@@ -510,21 +485,17 @@ form button {
     </div>
 </div>
 
-<!-- EMPLOYER MODAL -->
 <div class="modal" id="employerModal">
     <div class="modal-content">
-
         <button class="close"
                 onclick="closeModal('employerModal')">✕</button>
 
         <h2>Employer Interest Form</h2>
-
         <p>
             This is a demonstration form. It does not send or save information.
         </p>
 
         <form onsubmit="previewEmployer(event)">
-
             <label>Organisation name</label>
             <input required placeholder="Hospital or organisation name">
 
@@ -545,7 +516,6 @@ form button {
     </div>
 </div>
 
-<!-- SUPABASE LIBRARY -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
@@ -557,28 +527,36 @@ form button {
 const SUPABASE_URL =
     "https://icsbgvuesaklfjoucvqc.supabase.co";
 
+/*
+  PASTE YOUR NEW SUPABASE PUBLISHABLE KEY
+  BETWEEN THE QUOTATION MARKS BELOW.
+  Never use your secret or service-role key.
+*/
+
 const SUPABASE_PUBLISHABLE_KEY =
-    "sb_publishable_jAZNB_j1RyzxfHN_3WyInw_083EsS3I";
+    sb_publishable_jAZNB_j1RyzxfHN_3WyInw_083EsS3I;
 
 let supabaseClient = null;
+
+/* =====================================
+   INITIALIZE SUPABASE
+===================================== */
 
 function initializeSupabase() {
 
     const status = document.getElementById("databaseStatus");
 
     if (!window.supabase) {
-        status.textContent =
-            "Supabase library could not be loaded.";
+        status.textContent = "Supabase library could not be loaded.";
         return;
     }
 
     if (
-        !SUPABASE_PUBLISHABLE_KEY ||sb_publishable_jAZNB_j1RyzxfHN_3WyInw_083EsS3I
+        !SUPABASE_PUBLISHABLE_KEY ||
         SUPABASE_PUBLISHABLE_KEY ===
-        "sb_publishable_jAZNB_j1RyzxfHN_3WyInw_083EsS3I"
+        "PASTE_YOUR_NEW_PUBLISHABLE_KEY_HERE"
     ) {
-        status.textContent =
-            "Publishable key still needs to be added.";
+        status.textContent = "Publishable key still needs to be added.";
         return;
     }
 
@@ -592,13 +570,12 @@ function initializeSupabase() {
             "Supabase client initialized. Database test not yet completed.";
 
     } catch (error) {
-        status.textContent =
-            "Initialization failed: " + error.message;
+        status.textContent = "Initialization failed: " + error.message;
     }
 }
 
 /* =====================================
-   DATABASE CONNECTION TEST
+   TEST DATABASE CONNECTION
 ===================================== */
 
 async function testDatabaseConnection() {
@@ -609,9 +586,7 @@ async function testDatabaseConnection() {
         initializeSupabase();
     }
 
-    if (!supabaseClient) {
-        return;
-    }
+    if (!supabaseClient) return;
 
     status.textContent = "Testing database connection...";
 
@@ -622,9 +597,7 @@ async function testDatabaseConnection() {
             .select("id")
             .limit(1);
 
-        if (error) {
-            throw error;
-        }
+        if (error) throw error;
 
         status.textContent =
             "Database connection successful. Jobs table is accessible.";
@@ -645,13 +618,8 @@ async function testDatabaseConnection() {
 ===================================== */
 
 function showJob(
-    title,
-    employer,
-    location,
-    category,
-    type,
-    salary,
-    description
+    title, employer, location, category,
+    type, salary, description
 ) {
 
     document.getElementById("jobTitle").textContent = title;
@@ -661,7 +629,6 @@ function showJob(
     document.getElementById("jobType").textContent = type;
     document.getElementById("jobSalary").textContent = salary;
     document.getElementById("jobDescription").textContent = description;
-
     document.getElementById("applicationMessage").textContent = "";
 
     document.getElementById("jobModal").style.display = "block";
@@ -674,7 +641,6 @@ function showJob(
 function showEmployer() {
 
     document.getElementById("employerMessage").textContent = "";
-
     document.getElementById("employerModal").style.display = "block";
 }
 
@@ -683,7 +649,6 @@ function showEmployer() {
 ===================================== */
 
 function closeModal(id) {
-
     document.getElementById(id).style.display = "none";
 }
 
@@ -693,32 +658,29 @@ function closeModal(id) {
 
 function searchJobs() {
 
-    let keyword = document
+    const keyword = document
         .getElementById("keyword")
         .value.toLowerCase().trim();
 
-    let location = document
+    const location = document
         .getElementById("location")
         .value.toLowerCase().trim();
 
-    let jobs = document.querySelectorAll(".job");
-
+    const jobs = document.querySelectorAll(".job");
     let count = 0;
 
     jobs.forEach(job => {
 
-        let title = job.dataset.title.toLowerCase();
-        let place = job.dataset.location.toLowerCase();
+        const title = job.dataset.title.toLowerCase();
+        const place = job.dataset.location.toLowerCase();
 
-        let match =
+        const match =
             (!keyword || title.includes(keyword)) &&
             (!location || place.includes(location));
 
         job.style.display = match ? "block" : "none";
 
-        if (match) {
-            count++;
-        }
+        if (match) count++;
     });
 
     document.getElementById("noResults").style.display =
@@ -752,7 +714,7 @@ function previewEmployer(event) {
 }
 
 /* =====================================
-   CLOSE MODAL WHEN BACKGROUND IS CLICKED
+   CLOSE MODAL ON BACKGROUND CLICK
 ===================================== */
 
 window.onclick = function(event) {
@@ -763,7 +725,7 @@ window.onclick = function(event) {
 };
 
 /* =====================================
-   START APPLICATION
+   START WEBSITE
 ===================================== */
 
 document.addEventListener("DOMContentLoaded", function() {
