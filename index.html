@@ -643,6 +643,7 @@ footer { background:#0e2033;color:#d6e2ec;padding:55px 0 22px; }
     </nav>
 
     <div class="nav-actions">
+      <button class="btn btn-outline" id="candidateNav">Candidate Login</button>
       <button class="btn btn-outline" id="employerNav">Post a Job</button>
       <a class="btn btn-primary" href="#jobs">Explore Jobs</a>
     </div>
@@ -895,6 +896,7 @@ footer { background:#0e2033;color:#d6e2ec;padding:55px 0 22px; }
       <div class="footer-col">
         <h4>For Candidates</h4>
         <a href="#jobs">Explore opportunities</a>
+        <a href="#jobs" id="footerCandidate">Candidate account</a>
         <a href="#categories">Browse specialties</a>
         <a href="#how">How it works</a>
       </div>
@@ -1856,6 +1858,23 @@ async function loadCandidateAccount() {
   document.getElementById("candidateApplicationForm").hidden = !selectedLiveJob;
   await loadCandidateApplications();
 }
+
+async function openCandidatePortal() {
+  selectedLiveJob = null;
+  document.getElementById("candidateSelectedJob").textContent = "Select a published vacancy to start an application.";
+  document.getElementById("candidateApplicationForm").hidden = true;
+  document.getElementById("candidateAuthForm").hidden = false;
+  document.getElementById("candidateAccountPanel").hidden = true;
+  setCandidateMode("register");
+  openModal("candidateModal");
+  await loadCandidateAccount();
+}
+
+document.getElementById("candidateNav").addEventListener("click", openCandidatePortal);
+document.getElementById("footerCandidate").addEventListener("click", function (event) {
+  event.preventDefault();
+  openCandidatePortal();
+});
 
 document.getElementById("candidateRegisterTab").addEventListener("click", function () {
   setCandidateMode("register");
