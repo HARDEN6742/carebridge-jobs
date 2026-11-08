@@ -1,9 +1,13 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CareBridge Jobs | Healthcare Careers Worldwide</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Arial,sans-serif;background:#f5f8fc;color:#172b4d;line-height:1.6}
@@ -33,6 +37,7 @@ section{padding:55px 7%}
 .employer p{margin:10px auto 20px;max-width:650px}
 footer{background:#102f40;color:white;padding:30px 7%;text-align:center}
 footer p{color:#c4d5df;font-size:14px}
+#connectionStatus{font-size:13px;margin-top:12px;color:#c4d5df}
 .modal{display:none;position:fixed;inset:0;background:#0009;z-index:10;padding:20px;overflow:auto}
 .modal-content{background:white;max-width:600px;margin:35px auto;padding:28px;border-radius:12px;position:relative}
 .close{position:absolute;right:18px;top:12px;background:#edf2f7;padding:7px 12px}
@@ -41,9 +46,15 @@ footer p{color:#c4d5df;font-size:14px}
 form label{display:block;margin-top:14px;font-weight:bold}
 form input,form textarea{width:100%;padding:12px;margin-top:6px;border:1px solid #ccd5df;border-radius:6px;font:inherit}
 form button{margin-top:18px;width:100%}
-@media(max-width:650px){header{flex-direction:column;gap:12px}nav a{margin:0 7px;font-size:13px}.hero{padding:55px 5%}section{padding:40px 5%}}
+@media(max-width:650px){
+header{flex-direction:column;gap:12px}
+nav a{margin:0 7px;font-size:13px}
+.hero{padding:55px 5%}
+section{padding:40px 5%}
+}
 </style>
 </head>
+
 <body>
 
 <header>
@@ -71,6 +82,7 @@ form button{margin-top:18px;width:100%}
 <h2>Explore Healthcare Careers</h2>
 <p>Find opportunities across different healthcare professions.</p>
 </div>
+
 <div class="categories">
 <div class="category">🩺<br>Doctors</div>
 <div class="category">🏥<br>Nursing</div>
@@ -114,8 +126,14 @@ form button{margin-top:18px;width:100%}
 </div>
 
 </div>
-<div class="notice">Demonstration listings only. These are not verified vacancies and are not accepting real applications.</div>
-<p id="noResults" style="display:none;text-align:center;margin-top:20px">No matching demonstration opportunities found.</p>
+
+<div class="notice">
+Demonstration listings only. These are not verified vacancies and are not accepting real applications.
+</div>
+
+<p id="noResults" style="display:none;text-align:center;margin-top:20px">
+No matching demonstration opportunities found.
+</p>
 </section>
 
 <section class="employer" id="employers">
@@ -130,6 +148,7 @@ form button{margin-top:18px;width:100%}
 <h3>CareBridge Jobs</h3>
 <p>Connecting healthcare talent with opportunities worldwide.</p>
 <p>© 2026 CareBridge Jobs. All rights reserved.</p>
+<p id="connectionStatus">Database connection: Not tested</p>
 </footer>
 
 <div class="modal" id="jobModal">
@@ -141,21 +160,30 @@ form button{margin-top:18px;width:100%}
 <p id="jobLocation"></p>
 <p id="jobType"></p>
 <p id="jobSalary"></p>
+
 <h3 style="margin-top:20px">About this opportunity</h3>
 <p id="jobDescription"></p>
+
 <div class="notice">This is a demonstration listing, not a verified vacancy.</div>
+
 <h3 style="margin-top:20px">Application form preview</h3>
+
 <form onsubmit="previewApplication(event)">
 <label>Full name</label>
 <input required placeholder="Enter your full name">
+
 <label>Email address</label>
 <input type="email" required placeholder="Enter your email">
+
 <label>Phone number</label>
 <input required placeholder="Enter your phone number">
+
 <label>Short introduction</label>
 <textarea required rows="4" placeholder="Tell us about your experience"></textarea>
+
 <button type="submit">Preview Application</button>
 </form>
+
 <p id="applicationMessage" style="margin-top:12px"></p>
 </div>
 </div>
@@ -165,65 +193,142 @@ form button{margin-top:18px;width:100%}
 <button class="close" onclick="closeModal('employerModal')">✕</button>
 <h2>Employer Interest Form</h2>
 <p>This is a demonstration form. It does not send or save information.</p>
+
 <form onsubmit="previewEmployer(event)">
 <label>Organisation name</label>
 <input required placeholder="Hospital or organisation name">
+
 <label>Contact person's name</label>
 <input required placeholder="Your full name">
+
 <label>Work email</label>
 <input type="email" required placeholder="Your work email">
+
 <label>What kind of staff are you looking for?</label>
 <textarea required rows="4" placeholder="Describe your recruitment needs"></textarea>
+
 <button type="submit">Preview Employer Request</button>
 </form>
+
 <p id="employerMessage"></p>
 </div>
 </div>
 
 <script>
-function showJob(title,employer,location,category,type,salary,description){
-document.getElementById('jobTitle').textContent=title;
-document.getElementById('jobEmployer').textContent=employer;
-document.getElementById('jobLocation').textContent=location;
-document.getElementById('jobCategory').textContent=category;
-document.getElementById('jobType').textContent=type;
-document.getElementById('jobSalary').textContent=salary;
-document.getElementById('jobDescription').textContent=description;
-document.getElementById('applicationMessage').textContent='';
-document.getElementById('jobModal').style.display='block';
+// SUPABASE PROJECT CONFIGURATION
+// Replace the placeholder below with your own Supabase Publishable key.
+// Never put your Supabase Secret or service_role key in this file.
+
+const SUPABASE_URL = "https://icsbgvuesaklfjoucvqc.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE";
+
+let supabaseClient = null;
+
+async function testDatabaseConnection() {
+    const status = document.getElementById("connectionStatus");
+
+    if (!window.supabase) {
+        status.textContent = "Database connection: Supabase library failed to load.";
+        return;
+    }
+
+    if (
+        !SUPABASE_PUBLISHABLE_KEY ||
+        SUPABASE_PUBLISHABLE_KEY === "PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE"
+    ) {
+        status.textContent = "Database connection: Publishable key still needs to be added.";
+        return;
+    }
+
+    try {
+        supabaseClient = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_PUBLISHABLE_KEY
+        );
+
+        const { data, error } = await supabaseClient
+            .from("jobs")
+            .select("id")
+            .limit(1);
+
+        if (error) {
+            throw error;
+        }
+
+        status.textContent = "Database connection: Successfully connected.";
+        console.log("CareBridge database connection test passed.");
+
+    } catch (error) {
+        status.textContent = "Database connection: Test failed. Check configuration and database permissions.";
+        console.error("Supabase connection test:", error.message);
+    }
 }
-function showEmployer(){
-document.getElementById('employerMessage').textContent='';
-document.getElementById('employerModal').style.display='block';
+
+function showJob(title,employer,location,category,type,salary,description) {
+    document.getElementById("jobTitle").textContent = title;
+    document.getElementById("jobEmployer").textContent = employer;
+    document.getElementById("jobLocation").textContent = location;
+    document.getElementById("jobCategory").textContent = category;
+    document.getElementById("jobType").textContent = type;
+    document.getElementById("jobSalary").textContent = salary;
+    document.getElementById("jobDescription").textContent = description;
+    document.getElementById("applicationMessage").textContent = "";
+    document.getElementById("jobModal").style.display = "block";
 }
-function closeModal(id){
-document.getElementById(id).style.display='none';
+
+function showEmployer() {
+    document.getElementById("employerMessage").textContent = "";
+    document.getElementById("employerModal").style.display = "block";
 }
-function searchJobs(){
-let keyword=document.getElementById('keyword').value.toLowerCase().trim();
-let location=document.getElementById('location').value.toLowerCase().trim();
-let jobs=document.querySelectorAll('.job');
-let count=0;
-jobs.forEach(job=>{
-let title=job.dataset.title.toLowerCase();
-let place=job.dataset.location.toLowerCase();
-let match=(!keyword||title.includes(keyword))&&(!location||place.includes(location));
-job.style.display=match?'block':'none';
-if(match)count++;
-});
-document.getElementById('noResults').style.display=count?'none':'block';
+
+function closeModal(id) {
+    document.getElementById(id).style.display = "none";
 }
-function previewApplication(event){
-event.preventDefault();
-document.getElementById('applicationMessage').textContent='Preview only: your application has NOT been sent or saved. The real application system will be connected in a later stage.';
+
+function searchJobs() {
+    let keyword = document.getElementById("keyword").value.toLowerCase().trim();
+    let location = document.getElementById("location").value.toLowerCase().trim();
+    let jobs = document.querySelectorAll(".job");
+    let count = 0;
+
+    jobs.forEach(job => {
+        let title = job.dataset.title.toLowerCase();
+        let place = job.dataset.location.toLowerCase();
+
+        let match =
+            (!keyword || title.includes(keyword)) &&
+            (!location || place.includes(location));
+
+        job.style.display = match ? "block" : "none";
+
+        if (match) count++;
+    });
+
+    document.getElementById("noResults").style.display = count ? "none" : "block";
 }
-function previewEmployer(event){
-event.preventDefault();
-document.getElementById('employerMessage').textContent='Preview only: your employer request has NOT been sent or saved. Employer registration will be connected in a later stage.';
+
+function previewApplication(event) {
+    event.preventDefault();
+
+    document.getElementById("applicationMessage").textContent =
+        "Preview only: your application has NOT been sent or saved. The real application system will be connected after authentication and database testing.";
 }
-window.onclick=function(event){
-if(event.target.classList.contains('modal'))event.target.style.display='none';
+
+function previewEmployer(event) {
+    event.preventDefault();
+
+    document.getElementById("employerMessage").textContent =
+        "Preview only: your employer request has NOT been sent or saved. Employer registration will be connected in a later stage.";
+}
+
+window.onclick = function(event) {
+    if (event.target.classList.contains("modal")) {
+        event.target.style.display = "none";
+    }
 };
+
+testDatabaseConnection();
 </script>
+
 </body>
 </html>
