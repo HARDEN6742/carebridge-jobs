@@ -1474,7 +1474,7 @@ function formatJobSalary(job) {
   const max = job.salary_max === null || job.salary_max === undefined || job.salary_max === "" ? null : Number(job.salary_max);
   if (min === null && max === null) return job.salary || "Salary not disclosed";
   const money = function (amount) {
-    return new Intl.NumberFormat("en-US", { style:"currency", currency:currency, maximumFractionDigits:2 }).format(amount);
+    return new Intl.NumberFormat("en-US", { style:"currency", currency:currency, minimumFractionDigits:0, maximumFractionDigits:2 }).format(amount);
   };
   let amount = "";
   if (min !== null && max !== null) amount = min === max ? money(min) : money(min) + "–" + money(max);
