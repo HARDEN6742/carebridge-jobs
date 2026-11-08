@@ -1002,6 +1002,10 @@ footer { background:#0e2033;color:#d6e2ec;padding:55px 0 22px; }
         <div class="dashboard-heading"><h3>Your vacancies</h3><button type="button" class="btn btn-outline btn-small" id="refreshEmployerJobs">Refresh</button></div>
         <div id="employerJobsList" class="employer-jobs-list"><p class="dashboard-help">Loading your vacancies…</p></div>
       </section>
+      <section class="dashboard-section">
+        <div class="dashboard-heading"><h3>Applications received</h3><button type="button" class="btn btn-outline btn-small" id="refreshEmployerApplications">Refresh</button></div>
+        <div id="employerApplicationsList" class="employer-jobs-list"><p class="dashboard-help">Applications will appear here when candidates apply to your published vacancies.</p></div>
+      </section>
 
       <button class="btn btn-outline" type="button" id="employerSignOut">Log out</button>
     </div>
@@ -1036,6 +1040,10 @@ footer { background:#0e2033;color:#d6e2ec;padding:55px 0 22px; }
       <h3>Candidate profile</h3>
       <p id="candidateAccountEmail"></p>
       <p id="candidateAccountState" class="dashboard-help"></p>
+      <section class="dashboard-section" id="candidateApplicationsSection">
+        <div class="dashboard-heading"><h3>My applications</h3><button type="button" class="btn btn-outline btn-small" id="refreshCandidateApplications">Refresh</button></div>
+        <div id="candidateApplicationsList" class="employer-jobs-list"><p class="dashboard-help">Your submitted applications will appear here.</p></div>
+      </section>
       <form id="candidateApplicationForm">
         <h3 id="candidateApplyHeading">Submit your application</h3>
         <p class="dashboard-help" id="candidateSelectedJob"></p>
@@ -1339,6 +1347,7 @@ async function loadEmployerAccount() {
   document.getElementById("employerAccountState").textContent =
     "Your organisation profile is connected. Vacancies you create are saved as drafts and are not published publicly.";
   await loadEmployerJobs(profile);
+  await loadEmployerApplications();
 }
 
 
@@ -1377,6 +1386,36 @@ async function loadEmployerJobs(profile) {
       '<span class="job-status ' + escapeEmployerHtml(status) + '">' + escapeEmployerHtml(status) + '</span>' +
       '<p class="employer-job-meta">Created ' + escapeEmployerHtml(date) + '</p>' +
       (status === "draft" || status === "published" ? '<button class="btn btn-outline btn-small" type="button" data-close-job="' + escapeEmployerHtml(job.id) + '">Close vacancy</button>' : '') +
+    '</article>';
+  }).join("");
+}
+
+async function loadEmployerApplications() {
+  const list = document.getElementById("employerApplicationsList");
+  if (!list || !supabaseClient) return;
+  list.innerHTML = '<p class="dashboard-help">Loading applications…</p>';
+  const { data, error } = await supabaseClient
+    .from("applications")
+    .select("id, full_name, email, phone, introduction, status, created_at, jobs!applications_job_id_fkey(title, location)")
+    .order("created_at", { ascending: false })
+    .limit(100);
+  if (error) {
+    list.innerHTML = '<p class="dashboard-help">Applications could not be loaded: ' + escapeEmployerHtml(error.message) + '</p>';
+    return;
+  }
+  if (!data || data.length === 0) {
+    list.innerHTML = '<p class="dashboard-help">No applications have been received yet. Applications will appear here after a candidate applies to one of your published vacancies.</p>';
+    return;
+  }
+  list.innerHTML = data.map(function (application) {
+    const job = application.jobs || {};
+    const date = application.created_at ? new Date(application.created_at).toLocaleDateString() : "";
+    return '<article class="employer-job-card">' +
+      '<h4>' + escapeEmployerHtml(application.full_name) + '</h4>' +
+      '<p class="employer-job-meta"><strong>Vacancy:</strong> ' + escapeEmployerHtml(job.title || "Vacancy") + ' · ' + escapeEmployerHtml(job.location || "") + '</p>' +
+      '<p class="employer-job-meta"><strong>Email:</strong> ' + escapeEmployerHtml(application.email) + ' · <strong>Phone:</strong> ' + escapeEmployerHtml(application.phone) + '</p>' +
+      '<p class="employer-job-meta"><strong>Status:</strong> ' + escapeEmployerHtml(application.status) + ' · Received ' + escapeEmployerHtml(date) + '</p>' +
+      '<p>' + escapeEmployerHtml(application.introduction) + '</p>' +
     '</article>';
   }).join("");
 }
@@ -1581,6 +1620,34 @@ function setCandidateMode(mode) {
   document.getElementById("candidateAuthStatus").textContent = "";
 }
 
+async function loadCandidateApplications() {
+  const list = document.getElementById("candidateApplicationsList");
+  if (!list || !supabaseClient) return;
+  list.innerHTML = '<p class="dashboard-help">Loading your applications…</p>';
+  const { data, error } = await supabaseClient
+    .from("applications")
+    .select("id, status, created_at, jobs!applications_job_id_fkey(title, organization_name, location)")
+    .order("created_at", { ascending: false })
+    .limit(100);
+  if (error) {
+    list.innerHTML = '<p class="dashboard-help">Your applications could not be loaded: ' + escapeEmployerHtml(error.message) + '</p>';
+    return;
+  }
+  if (!data || data.length === 0) {
+    list.innerHTML = '<p class="dashboard-help">You have not submitted any applications yet.</p>';
+    return;
+  }
+  list.innerHTML = data.map(function (application) {
+    const job = application.jobs || {};
+    const date = application.created_at ? new Date(application.created_at).toLocaleDateString() : "";
+    return '<article class="employer-job-card">' +
+      '<h4>' + escapeEmployerHtml(job.title || "Healthcare vacancy") + '</h4>' +
+      '<p class="employer-job-meta">' + escapeEmployerHtml(job.organization_name || "Employer") + ' · ' + escapeEmployerHtml(job.location || "") + '</p>' +
+      '<p class="employer-job-meta">Status: ' + escapeEmployerHtml(application.status) + ' · Submitted ' + escapeEmployerHtml(date) + '</p>' +
+    '</article>';
+  }).join("");
+}
+
 async function loadCandidateAccount() {
   if (!supabaseClient) return;
   const { data, error } = await supabaseClient.auth.getUser();
@@ -1629,6 +1696,7 @@ async function loadCandidateAccount() {
     ? "Applying for: " + selectedLiveJob.title + " — " + selectedLiveJob.company
     : "Choose a published vacancy before submitting an application.";
   document.getElementById("candidateApplicationForm").hidden = !selectedLiveJob;
+  await loadCandidateApplications();
 }
 
 document.getElementById("candidateRegisterTab").addEventListener("click", function () {
@@ -1735,6 +1803,9 @@ document.getElementById("candidateApplicationForm").addEventListener("submit", a
     button.disabled = false;
   }
 });
+
+document.getElementById("refreshCandidateApplications").addEventListener("click", loadCandidateApplications);
+document.getElementById("refreshEmployerApplications").addEventListener("click", loadEmployerApplications);
 
 document.getElementById("candidateSignOut").addEventListener("click", async function () {
   const { error } = await supabaseClient.auth.signOut();
