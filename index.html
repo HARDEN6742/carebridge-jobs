@@ -762,6 +762,10 @@ footer { background:#0e2033;color:#d6e2ec;padding:55px 0 22px; }
         <option value="Nursing">Nursing</option>
         <option value="Laboratory">Laboratory</option>
         <option value="Doctors">Doctors</option>
+        <option value="Care &amp; Support">Care &amp; Support</option>
+        <option value="Pharmacy">Pharmacy</option>
+        <option value="Allied Health">Allied Health</option>
+        <option value="Administration">Administration</option>
       </select>
     </div>
 
@@ -783,7 +787,7 @@ footer { background:#0e2033;color:#d6e2ec;padding:55px 0 22px; }
           <span>⌖ London, UK</span>
         </div>
         <div class="job-card-bottom">
-          <span class="salary">Competitive salary</span>
+          <span class="salary">Example only: USD 2,000–3,000/month</span>
           <button class="text-link view-job">View opportunity →</button>
         </div>
       </article>
@@ -804,7 +808,7 @@ footer { background:#0e2033;color:#d6e2ec;padding:55px 0 22px; }
           <span>⌖ Toronto, Canada</span>
         </div>
         <div class="job-card-bottom">
-          <span class="salary">Competitive salary</span>
+          <span class="salary">Example only: CAD 2,000–3,000/month</span>
           <button class="text-link view-job">View opportunity →</button>
         </div>
       </article>
@@ -825,7 +829,7 @@ footer { background:#0e2033;color:#d6e2ec;padding:55px 0 22px; }
           <span>⌖ Nairobi, Kenya</span>
         </div>
         <div class="job-card-bottom">
-          <span class="salary">Competitive salary</span>
+          <span class="salary">Example only: USD 3,000–5,000/month</span>
           <button class="text-link view-job">View opportunity →</button>
         </div>
       </article>
@@ -935,6 +939,7 @@ footer { background:#0e2033;color:#d6e2ec;padding:55px 0 22px; }
     <span class="section-kicker" id="jobModalKicker">Demonstration opportunity</span>
     <h2 id="jobModalTitle">Job title</h2>
     <div id="jobModalCompany"></div>
+    <p class="salary" id="jobModalSalary"></p>
     <p id="jobModalDescription"></p>
     <div class="notice">
       Demonstration only: this is not a verified vacancy. Applications are not being accepted through this preview.
@@ -1003,7 +1008,60 @@ footer { background:#0e2033;color:#d6e2ec;padding:55px 0 22px; }
           <div class="form-group"><label for="jobCategory">Specialty</label><select id="jobCategory" required><option value="">Choose a specialty</option><option>Nursing</option><option>Doctors</option><option>Laboratory</option><option>Pharmacy</option><option>Allied Health</option><option>Administration</option><option>Other</option></select></div>
           <div class="form-group"><label for="jobLocation">Location</label><input id="jobLocation" required maxlength="150" placeholder="City, Country"></div>
           <div class="form-group"><label for="jobEmploymentType">Employment type</label><select id="jobEmploymentType"><option value="">Choose employment type</option><option>Full-time</option><option>Part-time</option><option>Contract</option><option>Temporary</option><option>Locum</option></select></div>
-          <div class="form-group"><label for="jobSalary">Salary (optional)</label><input id="jobSalary" maxlength="100" placeholder="e.g. Competitive / KSh 80,000 per month"></div>
+          <div class="form-group">
+            <label for="jobSalaryVisibility">Salary display</label>
+            <select id="jobSalaryVisibility" required>
+              <option value="disclosed">Show salary amount</option>
+              <option value="negotiable">Negotiable</option>
+              <option value="undisclosed">Do not disclose salary</option>
+            </select>
+          </div>
+          <div id="jobSalaryFields">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="jobSalaryMin">Minimum salary (optional)</label>
+                <input id="jobSalaryMin" type="number" min="0" step="0.01" inputmode="decimal" placeholder="e.g. 2000">
+              </div>
+              <div class="form-group">
+                <label for="jobSalaryMax">Maximum salary (optional)</label>
+                <input id="jobSalaryMax" type="number" min="0" step="0.01" inputmode="decimal" placeholder="e.g. 3000">
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="jobSalaryCurrency">Currency</label>
+                <select id="jobSalaryCurrency">
+                  <option value="USD">USD — US Dollar</option>
+                  <option value="KES">KES — Kenyan Shilling</option>
+                  <option value="GBP">GBP — Pound Sterling</option>
+                  <option value="EUR">EUR — Euro</option>
+                  <option value="CAD">CAD — Canadian Dollar</option>
+                  <option value="AUD">AUD — Australian Dollar</option>
+                  <option value="ZAR">ZAR — South African Rand</option>
+                  <option value="AED">AED — UAE Dirham</option>
+                  <option value="SAR">SAR — Saudi Riyal</option>
+                  <option value="UGX">UGX — Ugandan Shilling</option>
+                  <option value="TZS">TZS — Tanzanian Shilling</option>
+                  <option value="NGN">NGN — Nigerian Naira</option>
+                  <option value="INR">INR — Indian Rupee</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="jobSalaryPeriod">Payment period</label>
+                <select id="jobSalaryPeriod">
+                  <option value="">Choose period</option>
+                  <option value="hour">Per hour</option>
+                  <option value="day">Per day</option>
+                  <option value="week">Per week</option>
+                  <option value="biweekly">Every 2 weeks</option>
+                  <option value="month">Per month</option>
+                  <option value="year">Per year</option>
+                  <option value="contract">For the full contract</option>
+                </select>
+              </div>
+            </div>
+            <p class="dashboard-help">Enter a minimum, maximum or both. Select the period that matches how the employer pays the role.</p>
+          </div>
           <div class="form-group"><label for="jobDescription">Job description</label><textarea id="jobDescription" required rows="5" maxlength="10000" placeholder="Responsibilities, qualifications and experience required"></textarea></div>
           <button class="btn btn-primary" id="saveJobDraft" type="submit">Save as draft</button>
           <p class="status" id="jobFormStatus" role="status" aria-live="polite"></p>
@@ -1222,11 +1280,13 @@ function openJobCard(card) {
     id: liveId,
     title: card.dataset.title || "Healthcare vacancy",
     company: card.querySelector(".company") ? card.querySelector(".company").textContent : "",
-    description: card.dataset.description || ""
+    description: card.dataset.description || "",
+    salary: card.dataset.salary || "Salary not disclosed"
   } : null;
   document.getElementById("jobModalTitle").textContent = card.dataset.title || "Opportunity";
   document.getElementById("jobModalCompany").textContent =
     card.querySelector(".company") ? card.querySelector(".company").textContent : "";
+  document.getElementById("jobModalSalary").textContent = card.dataset.salary || (card.querySelector(".salary") ? card.querySelector(".salary").textContent : "Salary not disclosed");
   document.getElementById("jobModalDescription").textContent = card.dataset.description || "";
   document.getElementById("jobModalKicker").textContent = selectedLiveJob ? "Published vacancy" : "Demonstration opportunity";
   document.getElementById("jobModalNotice").textContent = selectedLiveJob
@@ -1249,7 +1309,7 @@ async function loadPublicJobs() {
   const note = document.getElementById("publicJobsNote");
   const { data, error } = await supabaseClient
     .from("jobs")
-    .select("id, title, category, organization_name, location, employment_type, salary, description, created_at")
+    .select("id, title, category, organization_name, location, employment_type, salary, salary_min, salary_max, salary_currency, salary_period, salary_visibility, description, created_at")
     .eq("status", "published")
     .order("created_at", { ascending: false })
     .limit(30);
@@ -1272,6 +1332,7 @@ async function loadPublicJobs() {
     card.dataset.title = job.title || "Healthcare vacancy";
     card.dataset.location = job.location || "";
     card.dataset.description = job.description || "";
+    card.dataset.salary = formatJobSalary(job);
     const initials = String(job.organization_name || "CB").split(/\\s+/).slice(0,2).map(function (part) { return part.charAt(0); }).join("").toUpperCase();
     const meta = [job.employment_type || "Employment type not specified", job.location || "Location not specified"];
     card.innerHTML =
@@ -1279,7 +1340,7 @@ async function loadPublicJobs() {
       '<h3>' + escapeEmployerHtml(job.title) + '</h3>' +
       '<div class="company">' + escapeEmployerHtml(job.organization_name) + ' · ' + escapeEmployerHtml(job.location) + '</div>' +
       '<div class="job-meta"><span>◷ ' + escapeEmployerHtml(meta[0]) + '</span><span>⌖ ' + escapeEmployerHtml(meta[1]) + '</span></div>' +
-      '<div class="job-card-bottom"><span class="salary">' + escapeEmployerHtml(job.salary || "Salary not specified") + '</span><button class="text-link view-job" type="button">View opportunity →</button></div>';
+      '<div class="job-card-bottom"><span class="salary">' + escapeEmployerHtml(formatJobSalary(job)) + '</span><button class="text-link view-job" type="button">View opportunity →</button></div>';
     grid.appendChild(card);
   });
   note.textContent = "Published vacancies are supplied by employers and made visible after platform approval. Please verify employer details before sharing personal information.";
@@ -1403,6 +1464,26 @@ function escapeEmployerHtml(value) {
   });
 }
 
+function formatJobSalary(job) {
+  const visibility = job.salary_visibility || (job.salary ? "disclosed" : "undisclosed");
+  if (visibility === "negotiable") return "Salary negotiable";
+  if (visibility === "undisclosed") return "Salary not disclosed";
+  const currency = job.salary_currency || "USD";
+  const periodLabels = { hour:"hour", day:"day", week:"week", biweekly:"2 weeks", month:"month", year:"year", contract:"contract" };
+  const min = job.salary_min === null || job.salary_min === undefined || job.salary_min === "" ? null : Number(job.salary_min);
+  const max = job.salary_max === null || job.salary_max === undefined || job.salary_max === "" ? null : Number(job.salary_max);
+  if (min === null && max === null) return job.salary || "Salary not disclosed";
+  const money = function (amount) {
+    return new Intl.NumberFormat("en-US", { style:"currency", currency:currency, maximumFractionDigits:2 }).format(amount);
+  };
+  let amount = "";
+  if (min !== null && max !== null) amount = min === max ? money(min) : money(min) + "–" + money(max);
+  else if (min !== null) amount = "From " + money(min);
+  else amount = "Up to " + money(max);
+  const period = periodLabels[job.salary_period] || "";
+  return amount + (period ? " / " + period : "");
+}
+
 async function loadAdminReview() {
   const employerList = document.getElementById("adminEmployerReviewList");
   const jobList = document.getElementById("adminJobReviewList");
@@ -1521,7 +1602,7 @@ async function loadEmployerJobs(profile) {
   list.innerHTML = '<p class="dashboard-help">Loading your vacancies…</p>';
   const { data, error } = await supabaseClient
     .from("jobs")
-    .select("id, title, category, location, employment_type, salary, status, created_at, payment_orders(status, product_code)")
+    .select("id, title, category, location, employment_type, salary, salary_min, salary_max, salary_currency, salary_period, salary_visibility, status, created_at, payment_orders(status, product_code)")
     .eq("employer_id", profile.id)
     .order("created_at", { ascending: false });
 
@@ -1541,7 +1622,7 @@ async function loadEmployerJobs(profile) {
     return '<article class="employer-job-card">' +
       '<h4>' + escapeEmployerHtml(job.title) + '</h4>' +
       '<p class="employer-job-meta">' + escapeEmployerHtml(job.category) + ' · ' + escapeEmployerHtml(job.location) + '</p>' +
-      '<p class="employer-job-meta">' + escapeEmployerHtml(job.employment_type || "Employment type not specified") + (job.salary ? ' · ' + escapeEmployerHtml(job.salary) : '') + '</p>' +
+      '<p class="employer-job-meta">' + escapeEmployerHtml(job.employment_type || "Employment type not specified") + ' · ' + escapeEmployerHtml(formatJobSalary(job)) + '</p>' +
       '<span class="job-status ' + escapeEmployerHtml(status) + '">' + escapeEmployerHtml(status) + '</span>' +
       '<p class="employer-job-meta">Created ' + escapeEmployerHtml(date) + '</p>' +
       (status === "draft" ? ((job.payment_orders || []).some(function (p) { return p.status === "paid"; })
@@ -1735,6 +1816,12 @@ document.getElementById("employerVerificationForm").addEventListener("submit", a
   }
 });
 
+document.getElementById("jobSalaryVisibility").addEventListener("change", function () {
+  const showSalaryFields = this.value === "disclosed";
+  document.getElementById("jobSalaryFields").hidden = !showSalaryFields;
+  document.getElementById("jobSalaryPeriod").required = showSalaryFields;
+});
+
 document.getElementById("employerJobForm").addEventListener("submit", async function (event) {
   event.preventDefault();
   const status = document.getElementById("jobFormStatus");
@@ -1760,6 +1847,31 @@ document.getElementById("employerJobForm").addEventListener("submit", async func
 
   button.disabled = true;
   status.textContent = "Saving your vacancy as a draft…";
+  const salaryVisibility = document.getElementById("jobSalaryVisibility").value;
+  const salaryMinInput = document.getElementById("jobSalaryMin").value;
+  const salaryMaxInput = document.getElementById("jobSalaryMax").value;
+  const salaryPeriod = document.getElementById("jobSalaryPeriod").value;
+  const salaryMin = salaryMinInput === "" ? null : Number(salaryMinInput);
+  const salaryMax = salaryMaxInput === "" ? null : Number(salaryMaxInput);
+  if (salaryVisibility === "disclosed") {
+    if (salaryMin === null && salaryMax === null) {
+      status.textContent = "Enter a minimum or maximum salary, or choose Negotiable / Do not disclose salary.";
+      button.disabled = false;
+      return;
+    }
+    if ((salaryMin !== null && (!Number.isFinite(salaryMin) || salaryMin < 0)) ||
+        (salaryMax !== null && (!Number.isFinite(salaryMax) || salaryMax < 0)) ||
+        (salaryMin !== null && salaryMax !== null && salaryMin > salaryMax)) {
+      status.textContent = "Check the salary amounts. The minimum cannot be greater than the maximum.";
+      button.disabled = false;
+      return;
+    }
+    if (!salaryPeriod) {
+      status.textContent = "Choose the salary payment period.";
+      button.disabled = false;
+      return;
+    }
+  }
   const payload = {
     employer_id: profile.id,
     title: document.getElementById("jobTitle").value.trim(),
@@ -1767,7 +1879,12 @@ document.getElementById("employerJobForm").addEventListener("submit", async func
     organization_name: profile.organization_name,
     location: document.getElementById("jobLocation").value.trim(),
     employment_type: document.getElementById("jobEmploymentType").value || null,
-    salary: document.getElementById("jobSalary").value.trim() || null,
+    salary_min: document.getElementById("jobSalaryMin").value === "" ? null : Number(document.getElementById("jobSalaryMin").value),
+    salary_max: document.getElementById("jobSalaryMax").value === "" ? null : Number(document.getElementById("jobSalaryMax").value),
+    salary_currency: document.getElementById("jobSalaryCurrency").value,
+    salary_period: document.getElementById("jobSalaryPeriod").value || null,
+    salary_visibility: document.getElementById("jobSalaryVisibility").value,
+    salary: null,
     description: document.getElementById("jobDescription").value.trim(),
     status: "draft"
   };
@@ -2147,6 +2264,7 @@ document.getElementById("testDatabase").addEventListener("click", testDatabaseCo
 document.getElementById("year").textContent = String(new Date().getFullYear());
 
 /* START */
+document.getElementById("jobSalaryVisibility").dispatchEvent(new Event("change"));
 initializeSupabase();
 loadPublicJobs();
 </script>
