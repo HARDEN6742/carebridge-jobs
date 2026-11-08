@@ -1469,7 +1469,7 @@ function formatJobSalary(job) {
   if (visibility === "negotiable") return "Salary negotiable";
   if (visibility === "undisclosed") return "Salary not disclosed";
   const currency = job.salary_currency || "USD";
-  const periodLabels = { hour:"hour", day:"day", week:"week", biweekly:"2 weeks", month:"month", year:"year", contract:"contract" };
+  const periodLabels = { hour:"hour", day:"day", week:"week", biweekly:"2 weeks", month:"month", year:"year", contract:"full contract" };
   const min = job.salary_min === null || job.salary_min === undefined || job.salary_min === "" ? null : Number(job.salary_min);
   const max = job.salary_max === null || job.salary_max === undefined || job.salary_max === "" ? null : Number(job.salary_max);
   if (min === null && max === null) return job.salary || "Salary not disclosed";
@@ -1879,10 +1879,10 @@ document.getElementById("employerJobForm").addEventListener("submit", async func
     organization_name: profile.organization_name,
     location: document.getElementById("jobLocation").value.trim(),
     employment_type: document.getElementById("jobEmploymentType").value || null,
-    salary_min: document.getElementById("jobSalaryMin").value === "" ? null : Number(document.getElementById("jobSalaryMin").value),
-    salary_max: document.getElementById("jobSalaryMax").value === "" ? null : Number(document.getElementById("jobSalaryMax").value),
+    salary_min: salaryVisibility === "disclosed" ? salaryMin : null,
+    salary_max: salaryVisibility === "disclosed" ? salaryMax : null,
     salary_currency: document.getElementById("jobSalaryCurrency").value,
-    salary_period: document.getElementById("jobSalaryPeriod").value || null,
+    salary_period: salaryVisibility === "disclosed" ? salaryPeriod : null,
     salary_visibility: document.getElementById("jobSalaryVisibility").value,
     salary: null,
     description: document.getElementById("jobDescription").value.trim(),
