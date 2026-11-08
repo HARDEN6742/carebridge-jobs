@@ -407,6 +407,43 @@ section { padding:76px 0; }
   max-width:760px;
 }
 
+.pricing-grid {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:18px;
+  max-width:820px;
+  margin:0 auto;
+}
+.pricing-card {
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:25px;
+  background:white;
+  box-shadow:0 8px 24px rgba(16,36,58,.05);
+}
+.pricing-featured { border-color:#82c9c6; }
+.pricing-label {
+  display:inline-block;
+  border-radius:20px;
+  background:#e7f5f4;
+  color:#087e80;
+  padding:5px 10px;
+  font-size:11px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+}
+.pricing-card h3 { font:800 18px Manrope;color:var(--navy);margin:15px 0 7px; }
+.pricing-price { font:800 30px Manrope;color:var(--blue);margin:0; }
+.pricing-kes { font-weight:800;color:#344c60;margin:2px 0 12px; }
+.pricing-description { font-size:13px;color:var(--muted);margin:0; }
+.pricing-disclosure {
+  max-width:820px;
+  margin:18px auto 0;
+  color:#718293;
+  font-size:12px;
+  text-align:center;
+}
 .how-grid {
   display:grid;
   grid-template-columns:repeat(3,1fr);
@@ -600,6 +637,7 @@ footer { background:#0e2033;color:#d6e2ec;padding:55px 0 22px; }
   .job-grid { grid-template-columns:1fr; }
   .jobs-top { align-items:flex-start;flex-direction:column; }
   .how-grid { grid-template-columns:1fr;gap:5px; }
+  .pricing-grid { grid-template-columns:1fr; }
   .cta-panel {
     padding:30px 23px;
     align-items:flex-start;
@@ -640,6 +678,7 @@ footer { background:#0e2033;color:#d6e2ec;padding:55px 0 22px; }
       <a href="#categories">Specialties</a>
       <a href="#how">How It Works</a>
       <a href="#employers">For Employers</a>
+      <a href="#pricing">Pricing</a>
     </nav>
 
     <div class="nav-actions">
@@ -802,6 +841,33 @@ footer { background:#0e2033;color:#d6e2ec;padding:55px 0 22px; }
         <p>Create a candidate account, apply for verified published vacancies and track application progress from your account.</p>
       </div>
     </div>
+  </div>
+</section>
+
+<section id="pricing" aria-labelledby="pricingTitle">
+  <div class="container">
+    <div class="section-head">
+      <span class="section-kicker">Transparent employer pricing</span>
+      <h2 id="pricingTitle">Simple vacancy advertising fees</h2>
+      <p>Candidate accounts and applications are free. Employers pay only for vacancy advertising services they choose.</p>
+    </div>
+    <div class="pricing-grid">
+      <article class="pricing-card">
+        <span class="pricing-label">Standard</span>
+        <h3>Standard vacancy listing</h3>
+        <p class="pricing-price">≈ US$19.25</p>
+        <p class="pricing-kes">KES 2,500 per vacancy</p>
+        <p class="pricing-description">Submit one genuine vacancy for review and publication after employer and listing approval.</p>
+      </article>
+      <article class="pricing-card pricing-featured">
+        <span class="pricing-label">Featured</span>
+        <h3>Featured vacancy listing</h3>
+        <p class="pricing-price">≈ US$38.50</p>
+        <p class="pricing-kes">KES 5,000 per vacancy</p>
+        <p class="pricing-description">Request featured placement for one genuine vacancy, subject to employer and listing approval.</p>
+      </article>
+    </div>
+    <p class="pricing-disclosure">USD figures are indicative conversions using the Central Bank of Kenya reference rate of KES 129.91 per US$1 (6 November 2026). Checkout, when activated, will charge the stated KES amount; your bank or payment provider may apply its own exchange rate and fees. Live checkout is not yet enabled while merchant approval is pending. No payment is being collected at this time.</p>
   </div>
 </section>
 
