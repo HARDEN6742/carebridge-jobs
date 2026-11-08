@@ -753,7 +753,7 @@ footer { background:#0e2033;color:#d6e2ec;padding:55px 0 22px; }
       <div>
         <span class="section-kicker">Explore opportunities</span>
         <h2>Featured opportunities</h2>
-        <p>Browse example listings and see how opportunities will appear.</p>
+        <p>Browse published vacancies. Demonstration examples are clearly labelled and cannot receive applications.</p>
       </div>
 
       <select class="filter-select" id="sortFilter" aria-label="Filter jobs">
@@ -930,7 +930,7 @@ footer { background:#0e2033;color:#d6e2ec;padding:55px 0 22px; }
 <div class="modal-backdrop" id="jobModal" role="dialog" aria-modal="true" aria-labelledby="jobModalTitle">
   <div class="modal">
     <button class="modal-close" data-close aria-label="Close">×</button>
-    <span class="section-kicker">Example opportunity</span>
+    <span class="section-kicker" id="jobModalKicker">Demonstration opportunity</span>
     <h2 id="jobModalTitle">Job title</h2>
     <div id="jobModalCompany"></div>
     <p id="jobModalDescription"></p>
@@ -1009,6 +1009,45 @@ footer { background:#0e2033;color:#d6e2ec;padding:55px 0 22px; }
     <div class="notice">
       Employer accounts do not automatically receive permission to publish jobs. Organisation and vacancy verification will be added before job publishing is enabled.
     </div>
+  </div>
+</div>
+
+<!-- CANDIDATE ACCOUNT AND APPLICATION MODAL -->
+<div class="modal-backdrop" id="candidateModal" role="dialog" aria-modal="true" aria-labelledby="candidateModalTitle">
+  <div class="modal">
+    <button class="modal-close" data-close aria-label="Close">×</button>
+    <h2 id="candidateModalTitle">Candidate account</h2>
+    <p id="candidateIntro">Create an account or log in to apply for verified healthcare vacancies.</p>
+    <div class="account-tabs" role="group" aria-label="Candidate account options">
+      <button type="button" class="account-tab active" id="candidateRegisterTab">Create account</button>
+      <button type="button" class="account-tab" id="candidateLoginTab">Log in</button>
+    </div>
+    <form id="candidateAuthForm">
+      <div id="candidateProfileFields">
+        <div class="form-group"><label for="candidateFullName">Full name</label><input id="candidateFullName" autocomplete="name" maxlength="150" required placeholder="Your full name"></div>
+        <div class="form-group"><label for="candidatePhoneAuth">Phone number</label><input id="candidatePhoneAuth" type="tel" autocomplete="tel" maxlength="40" placeholder="Your contact number"></div>
+      </div>
+      <div class="form-group"><label for="candidateEmail">Email address</label><input id="candidateEmail" type="email" autocomplete="email" required placeholder="you@example.com"></div>
+      <div class="form-group"><label for="candidatePassword">Password</label><input id="candidatePassword" type="password" minlength="8" required autocomplete="new-password" placeholder="At least 8 characters"></div>
+      <button class="btn btn-primary" id="candidateAuthSubmit" type="submit">Create candidate account</button>
+      <p class="status" id="candidateAuthStatus" role="status" aria-live="polite"></p>
+    </form>
+    <div class="account-panel" id="candidateAccountPanel" hidden>
+      <h3>Candidate profile</h3>
+      <p id="candidateAccountEmail"></p>
+      <p id="candidateAccountState" class="dashboard-help"></p>
+      <form id="candidateApplicationForm">
+        <h3 id="candidateApplyHeading">Submit your application</h3>
+        <p class="dashboard-help" id="candidateSelectedJob"></p>
+        <div class="form-group"><label for="candidateApplyName">Full name</label><input id="candidateApplyName" maxlength="150" required></div>
+        <div class="form-group"><label for="candidateApplyPhone">Phone number</label><input id="candidateApplyPhone" type="tel" maxlength="40" required></div>
+        <div class="form-group"><label for="candidateIntroduction">Short introduction</label><textarea id="candidateIntroduction" rows="5" maxlength="4000" required placeholder="Briefly describe your relevant qualifications and experience"></textarea></div>
+        <button class="btn btn-primary" id="candidateApplySubmit" type="submit">Submit application</button>
+        <p class="status" id="candidateApplicationStatus" role="status" aria-live="polite"></p>
+      </form>
+      <button class="btn btn-outline" type="button" id="candidateSignOut">Log out</button>
+    </div>
+    <div class="notice">Only verified, published vacancies can receive applications. Never pay a recruiter to secure a job. CareBridge Jobs will not ask for your account password.</div>
   </div>
 </div>
 
@@ -1143,33 +1182,85 @@ document.addEventListener("keydown", function (event) {
   }
 });
 
-/* JOB DETAILS */
-document.querySelectorAll(".view-job").forEach(function (button) {
-  button.addEventListener("click", function () {
-    const card = button.closest(".job-card");
+/* LIVE PUBLIC VACANCIES AND JOB DETAILS */
+let selectedLiveJob = null;
 
-    document.getElementById("jobModalTitle").textContent =
-      card.dataset.title || "Opportunity";
+function openJobCard(card) {
+  const liveId = card.getAttribute("data-live-job-id");
+  selectedLiveJob = liveId ? {
+    id: liveId,
+    title: card.dataset.title || "Healthcare vacancy",
+    company: card.querySelector(".company") ? card.querySelector(".company").textContent : "",
+    description: card.dataset.description || ""
+  } : null;
+  document.getElementById("jobModalTitle").textContent = card.dataset.title || "Opportunity";
+  document.getElementById("jobModalCompany").textContent =
+    card.querySelector(".company") ? card.querySelector(".company").textContent : "";
+  document.getElementById("jobModalDescription").textContent = card.dataset.description || "";
+  document.getElementById("jobModalKicker").textContent = selectedLiveJob ? "Published vacancy" : "Demonstration opportunity";
+  document.getElementById("jobModalNotice").textContent = selectedLiveJob
+    ? "This vacancy is published in CareBridge Jobs. Review the requirements carefully before applying."
+    : "Demonstration only: this is not a verified vacancy. Applications are not accepted for this example.";
+  document.getElementById("previewApply").hidden = !selectedLiveJob;
+  openModal("jobModal");
+}
 
-    document.getElementById("jobModalCompany").textContent =
-      card.querySelector(".company").textContent;
-
-    document.getElementById("jobModalDescription").textContent =
-      card.dataset.description || "";
-
-    openModal("jobModal");
-  });
+document.getElementById("jobGrid").addEventListener("click", function (event) {
+  const button = event.target.closest(".view-job");
+  if (!button) return;
+  const card = button.closest(".job-card");
+  if (card) openJobCard(card);
 });
 
-document.getElementById("previewApply").addEventListener("click", function () {
+async function loadPublicJobs() {
+  if (!supabaseClient) return;
+  const grid = document.getElementById("jobGrid");
+  const note = document.getElementById("publicJobsNote");
+  const { data, error } = await supabaseClient
+    .from("jobs")
+    .select("id, title, category, organization_name, location, employment_type, salary, description, created_at")
+    .eq("status", "published")
+    .order("created_at", { ascending: false })
+    .limit(30);
+
+  grid.querySelectorAll("[data-live-job-id]").forEach(function (card) { card.remove(); });
+  if (error) {
+    note.textContent = "Published vacancies could not be loaded right now. Please refresh later.";
+    return;
+  }
+  if (!data || data.length === 0) {
+    note.textContent = "No verified vacancies are currently published. The example listings are demonstrations only and cannot receive applications.";
+    return;
+  }
+
+  data.forEach(function (job) {
+    const card = document.createElement("article");
+    card.className = "job-card";
+    card.setAttribute("data-live-job-id", job.id);
+    card.dataset.category = job.category || "Other";
+    card.dataset.title = job.title || "Healthcare vacancy";
+    card.dataset.location = job.location || "";
+    card.dataset.description = job.description || "";
+    const initials = String(job.organization_name || "CB").split(/\\s+/).slice(0,2).map(function (part) { return part.charAt(0); }).join("").toUpperCase();
+    const meta = [job.employment_type || "Employment type not specified", job.location || "Location not specified"];
+    card.innerHTML =
+      '<div class="job-card-top"><div class="company-logo">' + escapeEmployerHtml(initials) + '</div><span class="tag">' + escapeEmployerHtml(job.category || "Other") + '</span></div>' +
+      '<h3>' + escapeEmployerHtml(job.title) + '</h3>' +
+      '<div class="company">' + escapeEmployerHtml(job.organization_name) + ' · ' + escapeEmployerHtml(job.location) + '</div>' +
+      '<div class="job-meta"><span>◷ ' + escapeEmployerHtml(meta[0]) + '</span><span>⌖ ' + escapeEmployerHtml(meta[1]) + '</span></div>' +
+      '<div class="job-card-bottom"><span class="salary">' + escapeEmployerHtml(job.salary || "Salary not specified") + '</span><button class="text-link view-job" type="button">View opportunity →</button></div>';
+    grid.appendChild(card);
+  });
+  note.textContent = "Published vacancies are supplied by employers and made visible after platform approval. Please verify employer details before sharing personal information.";
+}
+
+document.getElementById("previewApply").addEventListener("click", async function () {
+  if (!selectedLiveJob) return;
   closeModal(document.getElementById("jobModal"));
-
-  document.getElementById("infoTitle").textContent = "Application preview";
-
-  document.getElementById("infoText").textContent =
-    "The candidate application feature is not connected yet. No application has been submitted or saved.";
-
-  openModal("infoModal");
+  document.getElementById("candidateSelectedJob").textContent =
+    "Applying for: " + selectedLiveJob.title + " — " + selectedLiveJob.company;
+  openModal("candidateModal");
+  await loadCandidateAccount();
 });
 
 /* EMPLOYER AUTHENTICATION AND ORGANISATION PROFILE */
@@ -1472,6 +1563,192 @@ document.getElementById("employerSignOut").addEventListener("click", async funct
 
 
 
+/* CANDIDATE AUTHENTICATION AND APPLICATIONS */
+let candidateMode = "register";
+
+function setCandidateMode(mode) {
+  candidateMode = mode;
+  const registering = mode === "register";
+  document.getElementById("candidateRegisterTab").classList.toggle("active", registering);
+  document.getElementById("candidateLoginTab").classList.toggle("active", !registering);
+  document.getElementById("candidateProfileFields").hidden = !registering;
+  document.getElementById("candidateFullName").required = registering;
+  document.getElementById("candidatePassword").autocomplete = registering ? "new-password" : "current-password";
+  document.getElementById("candidateAuthSubmit").textContent = registering ? "Create candidate account" : "Log in";
+  document.getElementById("candidateIntro").textContent = registering
+    ? "Create an account to apply for verified healthcare vacancies."
+    : "Log in to manage your candidate profile and applications.";
+  document.getElementById("candidateAuthStatus").textContent = "";
+}
+
+async function loadCandidateAccount() {
+  if (!supabaseClient) return;
+  const { data, error } = await supabaseClient.auth.getUser();
+  if (error || !data.user) {
+    document.getElementById("candidateAuthForm").hidden = false;
+    document.getElementById("candidateAccountPanel").hidden = true;
+    return;
+  }
+  const user = data.user;
+  let { data: profile, error: profileError } = await supabaseClient
+    .from("applicant_profiles")
+    .select("id, full_name, phone")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (profileError) {
+    document.getElementById("candidateAuthStatus").textContent =
+      "Your account is signed in, but the candidate profile could not be loaded: " + profileError.message;
+    return;
+  }
+  if (!profile) {
+    const metadata = user.user_metadata || {};
+    const { data: created, error: createError } = await supabaseClient
+      .from("applicant_profiles")
+      .insert({
+        user_id: user.id,
+        full_name: String(metadata.full_name || "").trim() || "Candidate",
+        phone: String(metadata.phone || "").trim() || null
+      })
+      .select("id, full_name, phone")
+      .single();
+    if (createError) {
+      document.getElementById("candidateAuthStatus").textContent =
+        "Your account is active, but your profile could not be created: " + createError.message;
+      return;
+    }
+    profile = created;
+  }
+  document.getElementById("candidateAuthForm").hidden = true;
+  document.getElementById("candidateAccountPanel").hidden = false;
+  document.getElementById("candidateAccountEmail").textContent = user.email || "";
+  document.getElementById("candidateAccountState").textContent =
+    "Your candidate profile is connected. Applications are submitted using your signed-in account.";
+  document.getElementById("candidateApplyName").value = profile.full_name || "";
+  document.getElementById("candidateApplyPhone").value = profile.phone || "";
+  document.getElementById("candidateSelectedJob").textContent = selectedLiveJob
+    ? "Applying for: " + selectedLiveJob.title + " — " + selectedLiveJob.company
+    : "Choose a published vacancy before submitting an application.";
+  document.getElementById("candidateApplicationForm").hidden = !selectedLiveJob;
+}
+
+document.getElementById("candidateRegisterTab").addEventListener("click", function () {
+  setCandidateMode("register");
+  document.getElementById("candidateAuthForm").hidden = false;
+  document.getElementById("candidateAccountPanel").hidden = true;
+});
+document.getElementById("candidateLoginTab").addEventListener("click", function () {
+  setCandidateMode("login");
+  document.getElementById("candidateAuthForm").hidden = false;
+  document.getElementById("candidateAccountPanel").hidden = true;
+});
+
+document.getElementById("candidateAuthForm").addEventListener("submit", async function (event) {
+  event.preventDefault();
+  if (!supabaseClient) {
+    document.getElementById("candidateAuthStatus").textContent = "Authentication is unavailable. Please refresh and try again.";
+    return;
+  }
+  const email = document.getElementById("candidateEmail").value.trim();
+  const password = document.getElementById("candidatePassword").value;
+  const button = document.getElementById("candidateAuthSubmit");
+  const status = document.getElementById("candidateAuthStatus");
+  button.disabled = true;
+  status.textContent = candidateMode === "register" ? "Creating your candidate account…" : "Signing you in…";
+  try {
+    if (candidateMode === "register") {
+      const fullName = document.getElementById("candidateFullName").value.trim();
+      const phone = document.getElementById("candidatePhoneAuth").value.trim();
+      const { data, error } = await supabaseClient.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: { full_name: fullName, phone: phone }
+        }
+      });
+      if (error) throw error;
+      if (data.session) {
+        await loadCandidateAccount();
+      } else {
+        status.textContent = "Registration received. Check your email to confirm your address, then return and log in.";
+      }
+    } else {
+      const { error } = await supabaseClient.auth.signInWithPassword({ email: email, password: password });
+      if (error) throw error;
+      await loadCandidateAccount();
+    }
+  } catch (error) {
+    status.textContent = error.message || "The request could not be completed. Please try again.";
+  } finally {
+    button.disabled = false;
+  }
+});
+
+document.getElementById("candidateApplicationForm").addEventListener("submit", async function (event) {
+  event.preventDefault();
+  const status = document.getElementById("candidateApplicationStatus");
+  const button = document.getElementById("candidateApplySubmit");
+  if (!selectedLiveJob) {
+    status.textContent = "Select a published vacancy before applying.";
+    return;
+  }
+  const { data: authData, error: authError } = await supabaseClient.auth.getUser();
+  if (authError || !authData.user) {
+    status.textContent = "Please log in again before submitting.";
+    return;
+  }
+  const fullName = document.getElementById("candidateApplyName").value.trim();
+  const phone = document.getElementById("candidateApplyPhone").value.trim();
+  const introduction = document.getElementById("candidateIntroduction").value.trim();
+  if (!fullName || !phone || !introduction) {
+    status.textContent = "Complete all application fields before submitting.";
+    return;
+  }
+  button.disabled = true;
+  status.textContent = "Submitting your application securely…";
+  try {
+    const { error: profileError } = await supabaseClient
+      .from("applicant_profiles")
+      .update({ full_name: fullName, phone: phone })
+      .eq("user_id", authData.user.id);
+    if (profileError) throw profileError;
+    const { error } = await supabaseClient.from("applications").insert({
+      job_id: selectedLiveJob.id,
+      applicant_id: authData.user.id,
+      full_name: fullName,
+      email: authData.user.email,
+      phone: phone,
+      introduction: introduction,
+      status: "submitted"
+    });
+    if (error) {
+      if (error.code === "23505") throw new Error("You have already applied for this vacancy.");
+      throw error;
+    }
+    status.textContent = "Application submitted successfully. You can log in again to manage your account.";
+    document.getElementById("candidateApplicationForm").reset();
+    document.getElementById("candidateApplyName").value = fullName;
+    document.getElementById("candidateApplyPhone").value = phone;
+  } catch (error) {
+    status.textContent = error.message || "Your application could not be submitted. Please try again.";
+  } finally {
+    button.disabled = false;
+  }
+});
+
+document.getElementById("candidateSignOut").addEventListener("click", async function () {
+  const { error } = await supabaseClient.auth.signOut();
+  if (error) {
+    document.getElementById("candidateAccountState").textContent = error.message;
+    return;
+  }
+  document.getElementById("candidateAccountPanel").hidden = true;
+  document.getElementById("candidateAuthForm").hidden = false;
+  document.getElementById("candidateAuthForm").reset();
+  setCandidateMode("register");
+  document.getElementById("candidateAuthStatus").textContent = "You have been logged out.";
+});
+
 /* JOB SEARCH AND FILTERS */
 function filterJobs() {
   const keyword = document.getElementById("keyword").value.trim().toLowerCase();
@@ -1548,6 +1825,7 @@ document.getElementById("year").textContent = String(new Date().getFullYear());
 
 /* START */
 initializeSupabase();
+loadPublicJobs();
 </script>
 
 </body>
