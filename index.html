@@ -1026,6 +1026,9 @@ footer { background:#0e2033;color:#d6e2ec;padding:55px 0 22px; }
         <div id="adminEmployerReviewList" class="employer-jobs-list"><p class="dashboard-help">Loading organisations…</p></div>
         <div class="dashboard-heading"><h4>Vacancy approval queue</h4></div>
         <div id="adminJobReviewList" class="employer-jobs-list"><p class="dashboard-help">Loading vacancies…</p></div>
+        <div class="dashboard-heading"><h4>Payments and revenue</h4><button type="button" class="btn btn-outline btn-small" id="refreshAdminPayments">Refresh</button></div>
+        <p class="dashboard-help">Successful employer payments are recorded here. No live payments are accepted until Paystack merchant activation and secure API credentials are configured.</p>
+        <div id="adminPaymentsSummary" class="employer-jobs-list"><p class="dashboard-help">Loading payment records…</p></div>
       </section>
       <button class="btn btn-outline" type="button" id="employerSignOut">Log out</button>
     </div>
@@ -1331,6 +1334,7 @@ async function loadEmployerAccount() {
     });
     document.getElementById("adminReviewSection").hidden = false;
     await loadAdminReview();
+    await loadAdminPayments();
     return;
   }
   document.getElementById("adminReviewSection").hidden = true;
@@ -1485,6 +1489,32 @@ document.getElementById("adminReviewSection").addEventListener("click", async fu
 });
 
 document.getElementById("refreshAdminReview").addEventListener("click", loadAdminReview);
+
+async function loadAdminPayments() {
+  const box = document.getElementById("adminPaymentsSummary");
+  if (!box || !supabaseClient) return;
+  box.innerHTML = '<p class="dashboard-help">Loading payment records…</p>';
+  const { data, error } = await supabaseClient
+    .from("payment_orders")
+    .select("id, product_code, amount_kes, currency, status, gateway_reference, created_at, paid_at")
+    .order("created_at", { ascending: false })
+    .limit(100);
+  if (error) {
+    box.innerHTML = '<p class="dashboard-help">Payment records are not available: ' + escapeEmployerHtml(error.message) + '</p>';
+    return;
+  }
+  const paid = (data || []).filter(function (item) { return item.status === "paid"; });
+  const total = paid.reduce(function (sum, item) { return sum + Number(item.amount_kes || 0); }, 0);
+  box.innerHTML = '<p><strong>Successful payments:</strong> ' + paid.length +
+    ' · <strong>Recorded gross revenue:</strong> KES ' + total.toLocaleString("en-KE") + '</p>' +
+    ((data && data.length) ? data.map(function (item) {
+      return '<article class="employer-job-card"><h4>' + escapeEmployerHtml(item.product_code.replaceAll("_", " ")) +
+        '</h4><p class="employer-job-meta">KES ' + Number(item.amount_kes).toLocaleString("en-KE") +
+        ' · ' + escapeEmployerHtml(item.status) + '</p><p class="employer-job-meta">Reference: ' +
+        escapeEmployerHtml(item.gateway_reference) + '</p></article>';
+    }).join("") : '<p class="dashboard-help">No payment records yet.</p>');
+}
+document.getElementById("refreshAdminPayments").addEventListener("click", loadAdminPayments);
 
 async function loadEmployerJobs(profile) {
   const list = document.getElementById("employerJobsList");
