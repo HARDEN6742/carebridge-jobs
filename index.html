@@ -754,7 +754,7 @@ footer { background:#0e2033;color:#d6e2ec;padding:55px 0 22px; }
       <div>
         <span class="section-kicker">Explore opportunities</span>
         <h2>Featured opportunities</h2>
-        <p>Browse published vacancies. Demonstration examples are clearly labelled and cannot receive applications.</p>
+        <p>Explore genuine vacancies submitted by healthcare employers and reviewed before publication.</p>
       </div>
 
       <select class="filter-select" id="sortFilter" aria-label="Filter jobs">
@@ -769,75 +769,10 @@ footer { background:#0e2033;color:#d6e2ec;padding:55px 0 22px; }
       </select>
     </div>
 
-    <div class="job-grid" id="jobGrid">
+    <div class="job-grid" id="jobGrid" aria-live="polite"></div>
 
-      <article class="job-card"
-        data-category="Nursing"
-        data-title="Registered Nurse"
-        data-location="London UK"
-        data-description="Example listing for a Registered Nurse role. This is demonstration content, not a verified vacancy.">
-        <div class="job-card-top">
-          <div class="company-logo">EH</div>
-          <span class="tag">Nursing</span>
-        </div>
-        <h3>Registered Nurse</h3>
-        <div class="company">Example Hospital · London, UK</div>
-        <div class="job-meta">
-          <span>◷ Full-time</span>
-          <span>⌖ London, UK</span>
-        </div>
-        <div class="job-card-bottom">
-          <span class="salary">Example only: USD 2,000–3,000/month</span>
-          <button class="text-link view-job">View opportunity →</button>
-        </div>
-      </article>
-
-      <article class="job-card"
-        data-category="Laboratory"
-        data-title="Medical Laboratory Technologist"
-        data-location="Toronto Canada"
-        data-description="Example listing for a Medical Laboratory Technologist role. This is demonstration content, not a verified vacancy.">
-        <div class="job-card-top">
-          <div class="company-logo">EM</div>
-          <span class="tag">Laboratory</span>
-        </div>
-        <h3>Medical Laboratory Technologist</h3>
-        <div class="company">Example Medical Centre · Toronto, Canada</div>
-        <div class="job-meta">
-          <span>◷ Full-time</span>
-          <span>⌖ Toronto, Canada</span>
-        </div>
-        <div class="job-card-bottom">
-          <span class="salary">Example only: CAD 2,000–3,000/month</span>
-          <button class="text-link view-job">View opportunity →</button>
-        </div>
-      </article>
-
-      <article class="job-card"
-        data-category="Doctors"
-        data-title="General Practitioner"
-        data-location="Nairobi Kenya"
-        data-description="Example listing for a General Practitioner role. This is demonstration content, not a verified vacancy.">
-        <div class="job-card-top">
-          <div class="company-logo">EH</div>
-          <span class="tag">Doctors</span>
-        </div>
-        <h3>General Practitioner</h3>
-        <div class="company">Example Health Centre · Nairobi, Kenya</div>
-        <div class="job-meta">
-          <span>◷ Full-time</span>
-          <span>⌖ Nairobi, Kenya</span>
-        </div>
-        <div class="job-card-bottom">
-          <span class="salary">Example only: USD 3,000–5,000/month</span>
-          <button class="text-link view-job">View opportunity →</button>
-        </div>
-      </article>
-
-    </div>
-
-    <p class="demo-note">
-      These are demonstration listings only. They are not verified vacancies and are not open for real applications.
+    <p class="demo-note" id="publicJobsNote" role="status">
+      Loading current vacancies…
     </p>
   </div>
 </section>
@@ -847,7 +782,7 @@ footer { background:#0e2033;color:#d6e2ec;padding:55px 0 22px; }
     <div class="section-head">
       <span class="section-kicker">Simple process</span>
       <h2>A clearer path to your next opportunity</h2>
-      <p>CareBridge Jobs is being developed to make healthcare career discovery easier.</p>
+      <p>Employers submit vacancies, candidates apply through their accounts, and listings are reviewed before publication.</p>
     </div>
 
     <div class="how-grid">
@@ -936,15 +871,15 @@ footer { background:#0e2033;color:#d6e2ec;padding:55px 0 22px; }
 <div class="modal-backdrop" id="jobModal" role="dialog" aria-modal="true" aria-labelledby="jobModalTitle">
   <div class="modal">
     <button class="modal-close" data-close aria-label="Close">×</button>
-    <span class="section-kicker" id="jobModalKicker">Demonstration opportunity</span>
+    <span class="section-kicker" id="jobModalKicker">Published vacancy</span>
     <h2 id="jobModalTitle">Job title</h2>
     <div id="jobModalCompany"></div>
     <p class="salary" id="jobModalSalary"></p>
     <p id="jobModalDescription"></p>
-    <div class="notice">
-      Demonstration only: this is not a verified vacancy. Applications are not being accepted through this preview.
+    <div class="notice" id="jobModalNotice">
+      Review the vacancy details carefully before applying.
     </div>
-    <button class="btn btn-primary" id="previewApply">Application process preview</button>
+    <button class="btn btn-primary" id="previewApply">Apply for this vacancy</button>
   </div>
 </div>
 
@@ -1288,10 +1223,10 @@ function openJobCard(card) {
     card.querySelector(".company") ? card.querySelector(".company").textContent : "";
   document.getElementById("jobModalSalary").textContent = card.dataset.salary || (card.querySelector(".salary") ? card.querySelector(".salary").textContent : "Salary not disclosed");
   document.getElementById("jobModalDescription").textContent = card.dataset.description || "";
-  document.getElementById("jobModalKicker").textContent = selectedLiveJob ? "Published vacancy" : "Demonstration opportunity";
+  document.getElementById("jobModalKicker").textContent = "Published vacancy";
   document.getElementById("jobModalNotice").textContent = selectedLiveJob
     ? "This vacancy is published in CareBridge Jobs. Review the requirements carefully before applying."
-    : "Demonstration only: this is not a verified vacancy. Applications are not accepted for this example.";
+    : "This vacancy is not available for applications.";
   document.getElementById("previewApply").hidden = !selectedLiveJob;
   openModal("jobModal");
 }
@@ -1320,7 +1255,7 @@ async function loadPublicJobs() {
     return;
   }
   if (!data || data.length === 0) {
-    note.textContent = "No verified vacancies are currently published. The example listings are demonstrations only and cannot receive applications.";
+    note.textContent = "There are no verified vacancies available right now. Healthcare employers can register and submit genuine opportunities for review. Please check back soon.";
     return;
   }
 
@@ -2225,7 +2160,7 @@ function filterJobs() {
     empty = document.createElement("p");
     empty.id = "noJobsMessage";
     empty.className = "demo-note";
-    empty.textContent = "No demonstration listings match your search.";
+    empty.textContent = "No published vacancies match your search. Try another keyword, location or specialty.";
     document.getElementById("jobGrid").after(empty);
   }
 
