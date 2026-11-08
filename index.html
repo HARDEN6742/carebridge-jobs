@@ -982,6 +982,16 @@ footer { background:#0e2033;color:#d6e2ec;padding:55px 0 22px; }
       <h3 id="employerAccountName">Employer dashboard</h3>
       <p id="employerAccountEmail"></p>
       <p id="employerAccountState">Your employer profile is connected.</p>
+      <section class="dashboard-section" id="employerVerificationSection">
+        <h3>Organisation verification</h3>
+        <p class="dashboard-help" id="employerVerificationState">Your organisation must be verified before any vacancy can be published.</p>
+        <form id="employerVerificationForm">
+          <div class="form-group"><label for="employerRegistrationNumber">Business / organisation registration number</label><input id="employerRegistrationNumber" maxlength="100" placeholder="Official registration number"></div>
+          <div class="form-group"><label for="employerWebsite">Official organisation website</label><input id="employerWebsite" type="url" maxlength="250" placeholder="https://www.example.org"></div>
+          <button class="btn btn-outline" id="saveEmployerVerification" type="submit">Save verification details</button>
+          <p class="status" id="employerVerificationFormStatus" role="status" aria-live="polite"></p>
+        </form>
+      </section>
 
       <section class="dashboard-section">
         <h3>Create a job vacancy</h3>
@@ -1007,6 +1017,14 @@ footer { background:#0e2033;color:#d6e2ec;padding:55px 0 22px; }
         <div id="employerApplicationsList" class="employer-jobs-list"><p class="dashboard-help">Applications will appear here when candidates apply to your published vacancies.</p></div>
       </section>
 
+      <section class="dashboard-section" id="adminReviewSection" hidden>
+        <h3>CareBridge administrator review</h3>
+        <p class="dashboard-help">Verify organisations only after checking official registration evidence and the organisation's genuine website. Only verified organisations can have vacancies published.</p>
+        <div class="dashboard-heading"><h4>Organisation verification queue</h4><button type="button" class="btn btn-outline btn-small" id="refreshAdminReview">Refresh</button></div>
+        <div id="adminEmployerReviewList" class="employer-jobs-list"><p class="dashboard-help">Loading organisations…</p></div>
+        <div class="dashboard-heading"><h4>Vacancy approval queue</h4></div>
+        <div id="adminJobReviewList" class="employer-jobs-list"><p class="dashboard-help">Loading vacancies…</p></div>
+      </section>
       <button class="btn btn-outline" type="button" id="employerSignOut">Log out</button>
     </div>
 
@@ -1300,9 +1318,26 @@ async function loadEmployerAccount() {
   }
 
   const user = data.user;
+  if (user.app_metadata && user.app_metadata.role === "admin") {
+    document.getElementById("employerForm").hidden = true;
+    document.getElementById("employerAccountPanel").hidden = false;
+    document.getElementById("employerAccountName").textContent = "CareBridge administrator";
+    document.getElementById("employerAccountEmail").textContent = user.email || "";
+    document.getElementById("employerAccountState").textContent = "Administrator access is active. Review organisations and vacancies below.";
+    ["employerVerificationSection","employerCreateJobSection","employerVacanciesSection","employerApplicationsSection"].forEach(function (id) {
+      document.getElementById(id).hidden = true;
+    });
+    document.getElementById("adminReviewSection").hidden = false;
+    await loadAdminReview();
+    return;
+  }
+  document.getElementById("adminReviewSection").hidden = true;
+  ["employerVerificationSection","employerCreateJobSection","employerVacanciesSection","employerApplicationsSection"].forEach(function (id) {
+    document.getElementById(id).hidden = false;
+  });
   const { data: profile, error: profileError } = await supabaseClient
     .from("employer_profiles")
-    .select("id, organization_name, contact_name")
+    .select("id, organization_name, contact_name, registration_number, website, verification_status")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -1346,6 +1381,11 @@ async function loadEmployerAccount() {
   document.getElementById("employerAccountEmail").textContent = user.email || "";
   document.getElementById("employerAccountState").textContent =
     "Your organisation profile is connected. Vacancies you create are saved as drafts and are not published publicly.";
+  document.getElementById("employerVerificationState").textContent =
+    "Verification status: " + (profile.verification_status || "pending") + ". " +
+    (profile.verification_status === "verified" ? "Your organisation has passed the platform verification check." : "Submit your official registration number and website. An administrator must review them before publishing is permitted.");
+  document.getElementById("employerRegistrationNumber").value = profile.registration_number || "";
+  document.getElementById("employerWebsite").value = profile.website || "";
   await loadEmployerJobs(profile);
   await loadEmployerApplications();
 }
@@ -1356,6 +1396,93 @@ function escapeEmployerHtml(value) {
     return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char];
   });
 }
+
+async function loadAdminReview() {
+  const employerList = document.getElementById("adminEmployerReviewList");
+  const jobList = document.getElementById("adminJobReviewList");
+  if (!supabaseClient) return;
+  employerList.innerHTML = '<p class="dashboard-help">Loading organisations…</p>';
+  jobList.innerHTML = '<p class="dashboard-help">Loading vacancies…</p>';
+  const [employers, jobs] = await Promise.all([
+    supabaseClient.from("employer_profiles")
+      .select("id, organization_name, contact_name, registration_number, website, verification_status, created_at")
+      .order("created_at", { ascending: false }).limit(100),
+    supabaseClient.from("jobs")
+      .select("id, title, category, organization_name, location, description, status, created_at, employer_profiles!jobs_employer_id_fkey(verification_status, registration_number, website)")
+      .eq("status", "draft").order("created_at", { ascending: false }).limit(100)
+  ]);
+  if (employers.error) {
+    employerList.innerHTML = '<p class="dashboard-help">Could not load organisations: ' + escapeEmployerHtml(employers.error.message) + '</p>';
+  } else if (!employers.data || employers.data.length === 0) {
+    employerList.innerHTML = '<p class="dashboard-help">No organisations are registered yet.</p>';
+  } else {
+    employerList.innerHTML = employers.data.map(function (employer) {
+      return '<article class="employer-job-card">' +
+        '<h4>' + escapeEmployerHtml(employer.organization_name) + '</h4>' +
+        '<p class="employer-job-meta">Contact: ' + escapeEmployerHtml(employer.contact_name || "Not provided") + '</p>' +
+        '<p class="employer-job-meta">Registration: ' + escapeEmployerHtml(employer.registration_number || "Not submitted") + '</p>' +
+        '<p class="employer-job-meta">Website: ' + escapeEmployerHtml(employer.website || "Not submitted") + '</p>' +
+        '<p class="employer-job-meta">Status: ' + escapeEmployerHtml(employer.verification_status) + '</p>' +
+        (employer.verification_status !== "verified" ? '<button class="btn btn-outline btn-small" type="button" data-verify-employer="' + escapeEmployerHtml(employer.id) + '">Mark verified</button> ' : '') +
+        (employer.verification_status !== "rejected" ? '<button class="btn btn-outline btn-small" type="button" data-reject-employer="' + escapeEmployerHtml(employer.id) + '">Reject</button>' : '') +
+      '</article>';
+    }).join("");
+  }
+  if (jobs.error) {
+    jobList.innerHTML = '<p class="dashboard-help">Could not load draft vacancies: ' + escapeEmployerHtml(jobs.error.message) + '</p>';
+  } else if (!jobs.data || jobs.data.length === 0) {
+    jobList.innerHTML = '<p class="dashboard-help">There are no draft vacancies awaiting approval.</p>';
+  } else {
+    jobList.innerHTML = jobs.data.map(function (job) {
+      const employer = job.employer_profiles || {};
+      const verified = employer.verification_status === "verified";
+      return '<article class="employer-job-card">' +
+        '<h4>' + escapeEmployerHtml(job.title) + '</h4>' +
+        '<p class="employer-job-meta">' + escapeEmployerHtml(job.organization_name) + ' · ' + escapeEmployerHtml(job.category) + ' · ' + escapeEmployerHtml(job.location) + '</p>' +
+        '<p>' + escapeEmployerHtml(job.description) + '</p>' +
+        '<p class="employer-job-meta">Organisation verification: ' + escapeEmployerHtml(employer.verification_status || "unknown") + '</p>' +
+        (verified ? '<button class="btn btn-primary btn-small" type="button" data-admin-publish="' + escapeEmployerHtml(job.id) + '">Approve and publish</button> ' : '<span class="dashboard-help">Cannot publish until the organisation is verified.</span> ') +
+        '<button class="btn btn-outline btn-small" type="button" data-admin-close="' + escapeEmployerHtml(job.id) + '">Reject / close</button>' +
+      '</article>';
+    }).join("");
+  }
+}
+
+document.getElementById("adminReviewSection").addEventListener("click", async function (event) {
+  const verifyButton = event.target.closest("[data-verify-employer]");
+  const rejectButton = event.target.closest("[data-reject-employer]");
+  const publishButton = event.target.closest("[data-admin-publish]");
+  const closeButton = event.target.closest("[data-admin-close]");
+  let error = null;
+  if (verifyButton || rejectButton) {
+    const { data: authData } = await supabaseClient.auth.getUser();
+    if (!authData.user || !authData.user.app_metadata || authData.user.app_metadata.role !== "admin") return;
+    const employerId = (verifyButton || rejectButton).getAttribute(verifyButton ? "data-verify-employer" : "data-reject-employer");
+    const verified = Boolean(verifyButton);
+    const result = await supabaseClient.from("employer_profiles").update({
+      verification_status: verified ? "verified" : "rejected",
+      verification_notes: verified ? "Verified by CareBridge administrator." : "Rejected by CareBridge administrator. Further information is required.",
+      verified_at: verified ? new Date().toISOString() : null,
+      verified_by: authData.user.id
+    }).eq("id", employerId);
+    error = result.error;
+  } else if (publishButton || closeButton) {
+    const jobId = (publishButton || closeButton).getAttribute(publishButton ? "data-admin-publish" : "data-admin-close");
+    const result = await supabaseClient.from("jobs").update({
+      status: publishButton ? "published" : "closed"
+    }).eq("id", jobId);
+    error = result.error;
+  } else {
+    return;
+  }
+  if (error) {
+    window.alert("The review action could not be completed: " + error.message);
+    return;
+  }
+  await loadAdminReview();
+});
+
+document.getElementById("refreshAdminReview").addEventListener("click", loadAdminReview);
 
 async function loadEmployerJobs(profile) {
   const list = document.getElementById("employerJobsList");
@@ -1517,6 +1644,37 @@ document.getElementById("employerForm").addEventListener("submit", async functio
   }
 });
 
+
+document.getElementById("employerVerificationForm").addEventListener("submit", async function (event) {
+  event.preventDefault();
+  const status = document.getElementById("employerVerificationFormStatus");
+  const button = document.getElementById("saveEmployerVerification");
+  const { data: authData, error: authError } = await supabaseClient.auth.getUser();
+  if (authError || !authData.user) {
+    status.textContent = "Please log in again.";
+    return;
+  }
+  const registrationNumber = document.getElementById("employerRegistrationNumber").value.trim();
+  const website = document.getElementById("employerWebsite").value.trim();
+  if (!registrationNumber || !website) {
+    status.textContent = "Enter both the official registration number and organisation website.";
+    return;
+  }
+  button.disabled = true;
+  status.textContent = "Saving verification details…";
+  try {
+    const { error } = await supabaseClient.from("employer_profiles")
+      .update({ registration_number: registrationNumber, website: website })
+      .eq("user_id", authData.user.id);
+    if (error) throw error;
+    status.textContent = "Verification details saved. Your organisation is awaiting administrator review.";
+    await loadEmployerAccount();
+  } catch (error) {
+    status.textContent = error.message || "Could not save verification details.";
+  } finally {
+    button.disabled = false;
+  }
+});
 
 document.getElementById("employerJobForm").addEventListener("submit", async function (event) {
   event.preventDefault();
