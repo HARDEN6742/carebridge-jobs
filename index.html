@@ -1521,7 +1521,7 @@ async function loadEmployerJobs(profile) {
   list.innerHTML = '<p class="dashboard-help">Loading your vacancies…</p>';
   const { data, error } = await supabaseClient
     .from("jobs")
-    .select("id, title, category, location, employment_type, salary, status, created_at")
+    .select("id, title, category, location, employment_type, salary, status, created_at, payment_orders(status, product_code)")
     .eq("employer_id", profile.id)
     .order("created_at", { ascending: false });
 
@@ -1544,10 +1544,32 @@ async function loadEmployerJobs(profile) {
       '<p class="employer-job-meta">' + escapeEmployerHtml(job.employment_type || "Employment type not specified") + (job.salary ? ' · ' + escapeEmployerHtml(job.salary) : '') + '</p>' +
       '<span class="job-status ' + escapeEmployerHtml(status) + '">' + escapeEmployerHtml(status) + '</span>' +
       '<p class="employer-job-meta">Created ' + escapeEmployerHtml(date) + '</p>' +
+      (status === "draft" ? ((job.payment_orders || []).some(function (p) { return p.status === "paid"; })
+        ? '<p class="dashboard-help">Listing payment received. Awaiting CareBridge administrator review.</p>'
+        : '<button class="btn btn-primary btn-small" type="button" data-pay-job="' + escapeEmployerHtml(job.id) + '" data-pay-product="standard_listing">Pay KES 2,500 listing fee</button> <button class="btn btn-outline btn-small" type="button" data-pay-job="' + escapeEmployerHtml(job.id) + '" data-pay-product="featured_listing">Pay KES 5,000 featured fee</button>') : '') +
       (status === "draft" || status === "published" ? '<button class="btn btn-outline btn-small" type="button" data-close-job="' + escapeEmployerHtml(job.id) + '">Close vacancy</button>' : '') +
     '</article>';
   }).join("");
 }
+
+document.getElementById("employerJobsList").addEventListener("click", async function (event) {
+  const button = event.target.closest("[data-pay-job]");
+  if (!button) return;
+  const jobId = button.getAttribute("data-pay-job");
+  const productCode = button.getAttribute("data-pay-product");
+  button.disabled = true;
+  button.textContent = "Preparing secure checkout…";
+  const { data, error } = await supabaseClient.functions.invoke("paystack-checkout", {
+    body: { product_code: productCode, job_id: jobId }
+  });
+  if (error || !data || !data.authorization_url) {
+    window.alert((data && data.error) || (error && error.message) || "Payment setup is not complete yet. Please try again later.");
+    button.disabled = false;
+    button.textContent = productCode === "featured_listing" ? "Pay KES 5,000 featured fee" : "Pay KES 2,500 listing fee";
+    return;
+  }
+  window.location.href = data.authorization_url;
+});
 
 async function loadEmployerApplications() {
   const list = document.getElementById("employerApplicationsList");
