@@ -534,7 +534,7 @@ const SUPABASE_URL =
 */
 
 const SUPABASE_PUBLISHABLE_KEY =
-    sb_publishable_jAZNB_j1RyzxfHN_3WyInw_083EsS3I;
+    "sb_publishable_jAZNB_j1RyzxfHN_3WyInw_083EsS3I";
 
 let supabaseClient = null;
 
@@ -554,7 +554,7 @@ function initializeSupabase() {
     if (
         !SUPABASE_PUBLISHABLE_KEY ||
         SUPABASE_PUBLISHABLE_KEY ===
-        sb_publishable_jAZNB_j1RyzxfHN_3WyInw_083EsS3I
+        "sb_publishable_jAZNB_j1RyzxfHN_3WyInw_083EsS3I"
     ) {
         status.textContent = "Publishable key still needs to be added.";
         return;
