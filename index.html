@@ -1289,10 +1289,12 @@ function openJobCard(card) {
     card.querySelector(".company") ? card.querySelector(".company").textContent : "";
   document.getElementById("jobModalSalary").textContent = card.dataset.salary || (card.querySelector(".salary") ? card.querySelector(".salary").textContent : "Salary not disclosed");
   document.getElementById("jobModalDescription").textContent = card.dataset.description || "";
-  document.getElementById("jobModalKicker").textContent = "Published vacancy";
-  document.getElementById("jobModalNotice").textContent = selectedLiveJob
-    ? "This vacancy is published in CareBridge Jobs. Review the requirements carefully before applying."
-    : "This vacancy is not available for applications.";
+  document.getElementById("jobModalKicker").textContent = card.hasAttribute("data-demo-listing") ? "Demonstration listing" : "Published vacancy";
+  document.getElementById("jobModalNotice").textContent = card.hasAttribute("data-demo-listing")
+    ? "DEMO ONLY: This fictional sample is for website preview. The employer and vacancy are not real, and applications are not being accepted."
+    : selectedLiveJob
+      ? "This vacancy is published in CareBridge Jobs. Review the requirements carefully before applying."
+      : "This vacancy is not available for applications.";
   document.getElementById("previewApply").hidden = !selectedLiveJob;
   openModal("jobModal");
 }
@@ -1321,7 +1323,29 @@ async function loadPublicJobs() {
     return;
   }
   if (!data || data.length === 0) {
-    note.textContent = "There are no verified vacancies available right now. Healthcare employers can register and submit genuine opportunities for review. Please check back soon.";
+    const demoListings = [
+      { title:"Registered Nurse", category:"Nursing", location:"London, United Kingdom", type:"Full-time · Sample", salary:"Illustrative sample: US$2,800–US$3,600 / month", description:"DEMO ONLY. Fictional sample role for preview; not a real vacancy and no applications are being accepted." },
+      { title:"Medical Laboratory Technologist", category:"Laboratory", location:"Toronto, Canada", type:"Full-time · Sample", salary:"Illustrative sample: US$3,200–US$4,100 / month", description:"DEMO ONLY. Fictional sample role for preview; not a real vacancy and no applications are being accepted." },
+      { title:"General Practitioner", category:"Doctors", location:"Nairobi, Kenya", type:"Full-time · Sample", salary:"Illustrative sample: US$2,000–US$3,000 / month", description:"DEMO ONLY. Fictional sample role for preview; not a real vacancy and no applications are being accepted." }
+    ];
+    demoListings.forEach(function (job) {
+      const card = document.createElement("article");
+      card.className = "job-card";
+      card.setAttribute("data-demo-listing", "true");
+      card.dataset.category = job.category;
+      card.dataset.title = job.title;
+      card.dataset.location = job.location;
+      card.dataset.description = job.description;
+      card.dataset.salary = job.salary;
+      card.innerHTML =
+        '<div class="job-card-top"><div class="company-logo">CB</div><span class="tag">DEMO ONLY</span></div>' +
+        '<h3>' + escapeEmployerHtml(job.title) + '</h3>' +
+        '<div class="company">Fictional sample employer · ' + escapeEmployerHtml(job.location) + '</div>' +
+        '<div class="job-meta"><span>◷ ' + escapeEmployerHtml(job.type) + '</span><span>⌖ ' + escapeEmployerHtml(job.location) + '</span></div>' +
+        '<div class="job-card-bottom"><span class="salary">' + escapeEmployerHtml(job.salary) + '</span><button class="text-link view-job" type="button">View demo →</button></div>';
+      grid.appendChild(card);
+    });
+    note.textContent = "DEMONSTRATION PREVIEW — These sample roles, employers and salary figures are fictional and are not open for applications. Genuine vacancies appear only after employer review and publication.";
     return;
   }
 
