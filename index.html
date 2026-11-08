@@ -1545,6 +1545,11 @@ async function loadEmployerApplications() {
       '<p class="employer-job-meta"><strong>Email:</strong> ' + escapeEmployerHtml(application.email) + ' · <strong>Phone:</strong> ' + escapeEmployerHtml(application.phone) + '</p>' +
       '<p class="employer-job-meta"><strong>Status:</strong> ' + escapeEmployerHtml(application.status) + ' · Received ' + escapeEmployerHtml(date) + '</p>' +
       '<p>' + escapeEmployerHtml(application.introduction) + '</p>' +
+      '<div class="job-card-bottom"><select class="filter-select" aria-label="Application status" data-application-status="' + escapeEmployerHtml(application.id) + '">' +
+        ['submitted','reviewing','shortlisted','rejected','accepted'].map(function (value) {
+          return '<option value="' + value + '"' + (application.status === value ? ' selected' : '') + '>' + value.charAt(0).toUpperCase() + value.slice(1) + '</option>';
+        }).join("") +
+      '</select><button class="btn btn-outline btn-small" type="button" data-update-application="' + escapeEmployerHtml(application.id) + '">Update status</button></div>' +
     '</article>';
   }).join("");
 }
@@ -1979,6 +1984,24 @@ document.getElementById("candidateApplicationForm").addEventListener("submit", a
   } finally {
     button.disabled = false;
   }
+});
+
+document.getElementById("employerApplicationsList").addEventListener("click", async function (event) {
+  const button = event.target.closest("[data-update-application]");
+  if (!button) return;
+  const card = button.closest(".employer-job-card");
+  const select = card ? card.querySelector("[data-application-status]") : null;
+  if (!select) return;
+  button.disabled = true;
+  const { error } = await supabaseClient.from("applications")
+    .update({ status: select.value })
+    .eq("id", button.getAttribute("data-update-application"));
+  if (error) {
+    window.alert("Application status could not be updated: " + error.message);
+  } else {
+    await loadEmployerApplications();
+  }
+  button.disabled = false;
 });
 
 document.getElementById("refreshCandidateApplications").addEventListener("click", loadCandidateApplications);
